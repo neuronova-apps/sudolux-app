@@ -93,8 +93,10 @@ ruleButtons.forEach(button => {
 });
 renderRule('row');
 
-// Sudoku de demostración. Un único tablero, intencionalmente limitado.
-const puzzle = [
+// Sudoku de demostración.
+// En cada carga se transforma aleatoriamente una pareja tablero-solución válida.
+// Las transformaciones preservan la estructura y la solución del Sudoku.
+const basePuzzle = [
   5,3,0,0,7,0,0,0,0,
   6,0,0,1,9,5,0,0,0,
   0,9,8,0,0,0,0,6,0,
@@ -106,7 +108,7 @@ const puzzle = [
   0,0,0,0,8,0,0,7,9
 ];
 
-const solution = [
+const baseSolution = [
   5,3,4,6,7,8,9,1,2,
   6,7,2,1,9,5,3,4,8,
   1,9,8,3,4,2,5,6,7,
@@ -117,6 +119,51 @@ const solution = [
   2,8,7,4,1,9,6,3,5,
   3,4,5,2,8,6,1,7,9
 ];
+
+function shuffle(array) {
+  const copy = [...array];
+  for (let i = copy.length - 1; i > 0; i -= 1) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [copy[i], copy[j]] = [copy[j], copy[i]];
+  }
+  return copy;
+}
+
+function toMatrix(flat) {
+  return Array.from({length: 9}, (_, row) => flat.slice(row * 9, row * 9 + 9));
+}
+
+function randomGroupOrder() {
+  const groups = shuffle([0, 1, 2]);
+  return groups.flatMap(group => shuffle([0, 1, 2]).map(offset => group * 3 + offset));
+}
+
+function buildRandomDemo(puzzleSource, solutionSource) {
+  const digits = shuffle([1,2,3,4,5,6,7,8,9]);
+  const digitMap = new Map([1,2,3,4,5,6,7,8,9].map((number, index) => [number, digits[index]]));
+  const rowOrder = randomGroupOrder();
+  const columnOrder = randomGroupOrder();
+  const transpose = Math.random() < 0.5;
+
+  const transform = source => {
+    const matrix = toMatrix(source);
+    const reordered = rowOrder.map(row => columnOrder.map(column => matrix[row][column]));
+    const oriented = transpose
+      ? Array.from({length: 9}, (_, row) => Array.from({length: 9}, (_, column) => reordered[column][row]))
+      : reordered;
+
+    return oriented.flat().map(value => value === 0 ? 0 : digitMap.get(value));
+  };
+
+  return {
+    puzzle: transform(puzzleSource),
+    solution: transform(solutionSource)
+  };
+}
+
+const randomizedDemo = buildRandomDemo(basePuzzle, baseSolution);
+const puzzle = randomizedDemo.puzzle;
+const solution = randomizedDemo.solution;
 
 const sudokuBoard = document.querySelector('#sudokuBoard');
 const numberPad = document.querySelector('#numberPad');
@@ -131,6 +178,8 @@ let values = [...puzzle];
 let selectedIndex = puzzle.findIndex(value => value === 0);
 let errors = 0;
 let cells = [];
+let hasProgress = false;
+let gameCompleted = false;
 
 function coordinates(index) {
   return {row: Math.floor(index / 9), column: index % 9};
@@ -149,15 +198,21 @@ function cellLabel(index) {
   return `Fila ${row + 1}, columna ${column + 1}, ${value || 'vacía'}, ${type}`;
 }
 
+function updateProgressState() {
+  hasProgress = values.some((value, index) => puzzle[index] === 0 && value !== 0);
+}
+
 function updateProgress() {
   const editable = puzzle.reduce((total, value) => total + (value === 0 ? 1 : 0), 0);
   const correct = values.reduce((total, value, index) => total + (puzzle[index] === 0 && value === solution[index] ? 1 : 0), 0);
   const percent = Math.round((correct / editable) * 100);
+  gameCompleted = correct === editable;
+
   if (progressValue) progressValue.textContent = `${percent}%`;
   if (errorValue) errorValue.textContent = String(errors);
 
-  if (correct === editable) {
-    if (gameStatus) gameStatus.textContent = '¡Demo completada! Has resuelto correctamente el tablero.';
+  if (gameCompleted && gameStatus) {
+    gameStatus.textContent = '¡Demo completada! Has resuelto correctamente el tablero.';
   }
 }
 
@@ -176,6 +231,7 @@ function paintBoard() {
     cell.setAttribute('aria-label', cellLabel(index));
     cell.tabIndex = index === selectedIndex ? 0 : -1;
   });
+  updateProgressState();
   updateProgress();
 }
 
@@ -198,6 +254,11 @@ function enterNumber(number) {
     return;
   }
 
+  if (values[selectedIndex] === number) {
+    if (gameStatus) gameStatus.textContent = `El número ${number} ya está colocado en esta casilla.`;
+    return;
+  }
+
   const cell = cells[selectedIndex];
   values[selectedIndex] = number;
   cell?.classList.remove('invalid');
@@ -214,7 +275,7 @@ function enterNumber(number) {
 }
 
 function eraseSelected() {
-  if (selectedIndex < 0 || puzzle[selectedIndex] !== 0) return;
+  if (selectedIndex < 0 || puzzle[selectedIndex] !== 0 || values[selectedIndex] === 0) return;
   values[selectedIndex] = 0;
   cells[selectedIndex]?.classList.remove('invalid');
   if (gameStatus) gameStatus.textContent = 'Casilla borrada.';
@@ -236,6 +297,7 @@ function checkBoard() {
   });
 
   if (incorrect === 0 && empty === 0) {
+    gameCompleted = true;
     gameStatus.textContent = '¡Tablero completo y correcto! Has terminado la demostración.';
   } else if (incorrect > 0) {
     gameStatus.textContent = `Hay ${incorrect} ${incorrect === 1 ? 'casilla incorrecta' : 'casillas incorrectas'} y ${empty} por completar.`;
@@ -245,12 +307,19 @@ function checkBoard() {
 }
 
 function resetGame() {
+  if (hasProgress && !gameCompleted) {
+    const confirmed = window.confirm('Tienes una partida en progreso. ¿Deseas reiniciar este mismo Sudoku y perder los movimientos realizados?');
+    if (!confirmed) return;
+  }
+
   values = [...puzzle];
   errors = 0;
+  hasProgress = false;
+  gameCompleted = false;
   selectedIndex = puzzle.findIndex(value => value === 0);
   cells.forEach(cell => cell.classList.remove('invalid'));
   paintBoard();
-  if (gameStatus) gameStatus.textContent = 'La partida de demostración se reinició.';
+  if (gameStatus) gameStatus.textContent = 'La partida de demostración se reinició. El tablero actual se mantiene.';
 }
 
 function moveSelection(key) {
@@ -263,6 +332,14 @@ function moveSelection(key) {
   if (key === 'ArrowRight') nextColumn = Math.min(8, column + 1);
   selectCell(nextRow * 9 + nextColumn, true);
 }
+
+// Protección de la partida: al recargar, cerrar o abandonar la página,
+// el navegador solicita confirmación si existen movimientos sin terminar.
+window.addEventListener('beforeunload', event => {
+  if (!hasProgress || gameCompleted) return;
+  event.preventDefault();
+  event.returnValue = '';
+});
 
 if (sudokuBoard) {
   values.forEach((value, index) => {
