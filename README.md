@@ -39,15 +39,21 @@ La versión web inicial incorpora:
 - demostración visual interactiva de las tres reglas;
 - información sobre razonamiento, atención y actividad mental;
 - una partida clásica de demostración;
+- generación aleatoria de una variante válida del Sudoku en cada nueva carga de la página;
+- protección ante recarga, cierre o salida accidental cuando existe una partida en progreso;
 - navegación por teclado dentro del tablero;
 - ingreso mediante teclado o panel numérico;
 - validación básica de movimientos;
-- comprobación y reinicio de la partida;
+- comprobación y reinicio de la partida actual;
 - integración con el módulo de accesibilidad compartido de Neuronova Apps.
 
 ## Modo de juego web
 
-El juego web está limitado intencionalmente a un único tablero de demostración.
+El juego web está limitado intencionalmente a una partida clásica de demostración por sesión.
+
+Cada nueva carga genera una variante diferente mediante transformaciones que conservan una estructura de Sudoku válida. Mientras el usuario tenga movimientos realizados y la partida no esté completada, el navegador solicita confirmación antes de recargar, cerrar o abandonar la página para reducir la pérdida accidental del progreso.
+
+El botón **Reiniciar** no genera un Sudoku nuevo: restaura el mismo tablero de la sesión. Si ya existe progreso, solicita confirmación antes de borrar los movimientos realizados.
 
 No incluye por ahora:
 
@@ -78,19 +84,19 @@ La aplicación móvil será el espacio principal de crecimiento de Sudolux y pod
 - ayudas y pistas;
 - estadísticas de juego;
 - partidas guardadas;
-- retos y desafíos;
-- personalización;
-- progreso y logros;
-- otros modos de Sudoku.
+- desafíos diarios;
+- sistema de XP y logros;
+- ranking;
+- diferentes modos de juego;
+- opciones adicionales de personalización.
 
-## Referencias informativas
+## Desarrollo
 
-- National Institute on Aging. Salud cognitiva y adultos mayores: https://www.nia.nih.gov/espanol/cerebro-salud/salud-cognitiva-adultos-mayores
-- Brooker, H. et al. (2019). *The relationship between the frequency of number-puzzle use and baseline cognitive function in a large online sample of adults aged 50 and over*. PubMed: https://pubmed.ncbi.nlm.nih.gov/30746778/
+Sudolux se encuentra en desarrollo activo. La web actúa como presentación, espacio informativo y demostración funcional del proyecto, mientras que la aplicación se proyecta como la experiencia principal de juego.
 
 ## Ecosistema
 
-Sudolux forma parte de [Neuronova Apps](https://neuronova-apps.github.io/).
+Sudolux forma parte de [Neuronova Apps](https://neuronova-apps.github.io/), plataforma matriz que reúne distintos proyectos digitales desarrollados de manera independiente.
 
 ## Autoría
 
