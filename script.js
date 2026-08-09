@@ -3,6 +3,31 @@ const mainNav = document.querySelector('.main-nav');
 const year = document.querySelector('#year');
 const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
+// Visual principal de Sudolux: núcleo Sudoku + órbitas temáticas.
+const heroVisual = document.querySelector('.hero-visual');
+if (heroVisual) {
+  heroVisual.innerHTML = `
+    <div class="s-orbit s-orbit-outer" aria-hidden="true">
+      <span class="s-node s-node-top"><b>JUGAR</b></span>
+      <span class="s-node s-node-right"><b>LÓGICA</b></span>
+      <span class="s-node s-node-bottom"><b>RETO</b></span>
+      <span class="s-node s-node-left"><b>PROGRESO</b></span>
+    </div>
+    <div class="s-orbit s-orbit-inner" aria-hidden="true">
+      <span class="s-chip s-chip-top"><b>FILA</b></span>
+      <span class="s-chip s-chip-right"><b>COLUMNA</b></span>
+      <span class="s-chip s-chip-left"><b>BLOQUE</b></span>
+    </div>
+    <div class="s-core" aria-hidden="true">
+      <div class="s-core-grid">
+        <span>5</span><span>3</span><span>4</span>
+        <span>6</span><span>7</span><span>2</span>
+        <span>1</span><span>9</span><span>8</span>
+      </div>
+      <small>SUDOKU 9×9</small>
+    </div>`;
+}
+
 if (year) year.textContent = new Date().getFullYear();
 
 if (menuButton && mainNav) {
