@@ -4,6 +4,22 @@
 
 Sudolux se desarrolla de forma progresiva, priorizando una base clásica de Sudoku estable antes de añadir funciones avanzadas.
 
+## Estructura actual
+
+La versión web se organiza en archivos con responsabilidades separadas:
+
+- `index.html`: estructura semántica de la portada, contenido informativo, hero orbital y demo jugable;
+- `styles.css`: estilos generales, secciones, componentes, tablero y responsive;
+- `hero-orbit.css`: estilos exclusivos del sistema orbital del hero;
+- `script.js`: navegación, revelado progresivo, demostración de reglas y lógica del Sudoku;
+- `privacy/index.html`: política pública de privacidad;
+- `privacy/styles.css`: estilos exclusivos de la política de privacidad;
+- `sitemap.xml`: URLs públicas indexables;
+- `favicon.svg` y `favicon.ico`: identidad gráfica;
+- `.nojekyll`: publicación estática directa mediante GitHub Pages.
+
+El hero orbital se declara directamente en `index.html`; `script.js` no reescribe su marcado. De esta manera, contenido, presentación y lógica mantienen responsabilidades diferenciadas.
+
 ## Componentes actuales
 
 La versión web incluye:
