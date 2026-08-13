@@ -20,6 +20,10 @@ La versión web se organiza en archivos con responsabilidades separadas:
 
 El hero orbital se declara directamente en `index.html`; `script.js` no reescribe su marcado. De esta manera, contenido, presentación y lógica mantienen responsabilidades diferenciadas.
 
+## Publicación
+
+La versión web se publica desde la rama `main` mediante GitHub Pages en `https://neuronova-apps.github.io/sudolux-app/`.
+
 ## Componentes actuales
 
 La versión web incluye:
