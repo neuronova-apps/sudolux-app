@@ -6,7 +6,7 @@ El proyecto forma parte del ecosistema [Neuronova Apps](https://neuronova-apps.g
 
 ## Propósito
 
-Sudolux busca combinar tres componentes: conocer la lógica del Sudoku, comprender sus reglas y ofrecer una experiencia de juego sencilla. La web funciona actualmente como una **demo web funcional en desarrollo activo**: integra contenido introductorio, reglas interactivas, técnicas básicas de resolución y una partida clásica 9 × 9 jugable. La aplicación móvil permanece como una expansión futura para funciones de mayor amplitud.
+Sudolux busca combinar tres componentes: conocer la lógica del Sudoku, comprender sus reglas y ofrecer una experiencia de juego sencilla. La web funciona actualmente como una **demo web funcional en desarrollo activo**: integra contenido introductorio, reglas interactivas, técnicas básicas de resolución, cinco guías educativas públicas y una partida clásica 9 × 9 jugable. La aplicación móvil permanece como una expansión futura para funciones de mayor amplitud.
 
 ## Qué es el Sudoku
 
@@ -31,6 +31,20 @@ La web incorpora una secuencia introductoria para pasar de las reglas a una deci
 
 La secuencia recomendada es **observar → anotar → descartar → resolver**. Estas explicaciones son contenido educativo introductorio; Sudolux todavía no detecta ni propone automáticamente la siguiente técnica o movimiento.
 
+## Guías educativas indexables
+
+La portada enlaza cinco recursos públicos independientes que amplían el contenido educativo y conducen de nuevo a la práctica:
+
+- `como-jugar-sudoku.html`: objetivo, primeros pasos, candidatos y uso de la demo;
+- `reglas-sudoku.html`: fila, columna y bloque explicados como restricciones simultáneas;
+- `sudoku-para-principiantes.html`: rutina inicial, uso de notas y único posible;
+- `tecnicas-basicas-sudoku.html`: restricciones, candidatos, descarte y único posible con mayor detalle;
+- `sudoku-y-actividad-mental.html`: atención, razonamiento y límites de las afirmaciones sobre efectos cognitivos.
+
+Cada página tiene título, descripción, canonical, `index, follow`, metadatos Open Graph/Twitter básicos, navegación interna, accesibilidad compartida y enlaces de vuelta a la demo. El sitemap incluye portada, las cinco guías y privacidad.
+
+Estas guías son contenido educativo estático. No analizan automáticamente la partida actual ni sustituyen futuras pistas explicadas sobre el tablero.
+
 ## Actividad mental
 
 Resolver Sudoku implica sostener la atención, comparar alternativas, recordar información temporalmente y aplicar reglas de manera ordenada. Por ello puede formar parte de una rutina de actividades mentalmente estimulantes y de entretenimiento activo.
@@ -49,6 +63,7 @@ La demo web funcional incorpora:
 - reglas de fila, columna y bloque;
 - demostración visual interactiva de las tres reglas;
 - guía de técnicas básicas: restricciones, candidatos, descarte y único posible;
+- cinco páginas educativas indexables enlazadas desde la portada;
 - información sobre razonamiento, atención y actividad mental;
 - una partida clásica de demostración;
 - generación aleatoria de una variante válida cuando no existe una partida activa guardada;
@@ -122,17 +137,22 @@ La capa `game-accessibility.js` refuerza específicamente la experiencia del Sud
 - después de comprobar la partida, lleva el foco al mensaje de estado para comunicar el resultado;
 - al reiniciar, conserva el comportamiento de foco del control para no interferir con una posible cancelación de la confirmación.
 
+Las guías educativas emplean encabezados semánticos, navegación identificada, enlaces de salto, foco visible y el módulo de accesibilidad compartido.
+
 Estas mejoras no se presentan como certificación WCAG ni como sustituto de una auditoría formal de accesibilidad.
 
 ## Arquitectura visual y de interacción
 
 - `styles.css`: estilos globales, tablero y componentes principales;
 - `techniques.css`: estilos exclusivos de la sección educativa de técnicas;
+- `guide-cards.css`: tarjetas de acceso a las guías desde la portada;
+- `resources.css`: presentación compartida por las cinco páginas educativas;
 - `hero-orbit.css`: presentación orbital del hero;
 - `script.js`: lógica de juego, candidatos y persistencia;
-- `game-accessibility.js`: semántica ARIA y gestión complementaria del foco del tablero.
+- `game-accessibility.js`: semántica ARIA y gestión complementaria del foco del tablero;
+- las cinco páginas `.html` de guías: contenido educativo indexable sin lógica de juego duplicada.
 
-La separación evita mezclar el estado del juego con la capa específica de accesibilidad y facilita revisar cada responsabilidad de manera independiente.
+La separación evita mezclar el estado del juego con las capas de contenido, presentación y accesibilidad, y facilita revisar cada responsabilidad de manera independiente.
 
 ## Alcance de la aplicación
 
@@ -152,7 +172,7 @@ Estas funciones no se consideran disponibles hasta estar implementadas y verific
 
 ## Desarrollo
 
-Sudolux se encuentra en desarrollo activo. La web es actualmente una **demo web funcional** que combina aprendizaje introductorio, técnicas básicas, una partida clásica jugable con candidatos y persistencia local de la partida en curso. La aplicación móvil continúa en la hoja de ruta como expansión futura, no como requisito para que la versión web tenga valor propio.
+Sudolux se encuentra en desarrollo activo. La web es actualmente una **demo web funcional** que combina aprendizaje introductorio, guías públicas, técnicas básicas, una partida clásica jugable con candidatos y persistencia local de la partida en curso. La aplicación móvil continúa en la hoja de ruta como expansión futura, no como requisito para que la versión web tenga valor propio.
 
 ## Ecosistema
 
