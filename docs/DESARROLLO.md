@@ -39,7 +39,9 @@ La demo web funcional incluye:
 - demostración interactiva de reglas;
 - tablero 9 × 9 jugable;
 - entrada mediante teclado y panel numérico;
-- comprobación de movimientos;
+- validación inmediata de movimientos;
+- registro de casillas falladas por posición única;
+- comprobación del estado actual del tablero sin alterar ese registro;
 - reinicio del tablero actual;
 - generación aleatoria de una variante válida por carga;
 - aviso del navegador cuando existe una partida en progreso y se intenta abandonar la página;
@@ -56,6 +58,19 @@ La web parte de una pareja tablero-solución válida y aplica transformaciones q
 - transposición cuando corresponda.
 
 Este enfoque permite mostrar una variante distinta sin introducir inconsistencias en la solución.
+
+## Modelo de validación y errores
+
+La entrada de un número se valida inmediatamente contra la solución de la variante actual.
+
+La métrica visible **Casillas falladas** utiliza un conjunto de índices (`Set`) y representa posiciones distintas que han recibido al menos un intento incorrecto. Varias respuestas erróneas en la misma casilla siguen contando como una sola casilla fallada.
+
+Corregir o borrar posteriormente una casilla no elimina su registro histórico durante la partida. El botón **Comprobar partida** recorre el tablero y marca las respuestas incorrectas que siguen presentes en ese momento, pero no añade nuevas posiciones al registro de casillas falladas. Así se mantienen separados:
+
+- el historial de casillas que causaron al menos un error;
+- el estado actual de respuestas incorrectas del tablero.
+
+Reiniciar la demo devuelve el registro de casillas falladas a cero junto con los movimientos realizados.
 
 ## Estado de partida
 
@@ -83,7 +98,8 @@ El tablero debe procurar:
 3. funcionamiento en móvil y escritorio;
 4. persistencia visual de selección y estados;
 5. protección contra pérdida accidental de progreso;
-6. accesibilidad de mensajes de error y finalización.
+6. consistencia entre casillas falladas y estado actual al comprobar;
+7. accesibilidad de mensajes de error y finalización.
 
 ## Crecimiento
 
