@@ -19,6 +19,7 @@ La versión web se organiza en archivos con responsabilidades separadas:
 - `techniques.css`: estilos exclusivos de la sección educativa de técnicas de resolución;
 - `hero-orbit.css`: estilos exclusivos del sistema orbital del hero;
 - `script.js`: navegación, demostración de reglas, lógica del Sudoku, candidatos y persistencia local segura;
+- `game-accessibility.js`: semántica ARIA complementaria y gestión de foco específica del tablero;
 - `privacy/index.html`: política pública de privacidad;
 - `privacy/styles.css`: estilos exclusivos de la política de privacidad;
 - `sitemap.xml`: URLs públicas indexables;
@@ -58,7 +59,8 @@ La demo web funcional incluye:
 - fallback en memoria cuando `localStorage` no está disponible;
 - generación aleatoria de una variante válida cuando no existe progreso persistido;
 - protección adicional con `beforeunload` cuando existe progreso;
-- módulo central de accesibilidad de Neuronova Apps.
+- módulo central de accesibilidad de Neuronova Apps;
+- capa específica de accesibilidad para semántica y flujo de foco del Sudoku.
 
 ## Candidatos y modo Notas
 
@@ -110,24 +112,30 @@ Mientras exista un valor o candidato y la partida no esté completada, la págin
 
 El botón Reiniciar conserva el mismo Sudoku en la vista actual, elimina valores y candidatos, limpia las casillas falladas, desactiva Notas y elimina el guardado al quedar sin progreso.
 
-## Accesibilidad
+## Accesibilidad específica del tablero
 
-El tablero procura:
+`game-accessibility.js` se ejecuta después de `script.js` y complementa la interacción ya existente sin modificar el estado del juego.
 
-- selección visible;
-- identificación de fila y columna;
-- navegación con flechas;
-- entrada con teclas 1–9;
-- alternancia de Notas con `N`;
-- botón Notas con `aria-pressed`;
-- candidatos incluidos en el nombre accesible de cada casilla;
-- borrado con `Backspace` o `Delete`;
-- foco visible;
-- mensajes de estado accesibles;
-- mensaje de restauración cuando se recupera una partida local;
-- compatibilidad con ampliación de texto y alto contraste.
+El tablero declara una estructura de 9 filas y 9 columnas y cada casilla sincroniza:
 
-La sección educativa utiliza encabezados, artículos y ejemplos textuales; las representaciones visuales de candidatos llevan descripción accesible cuando aportan significado.
+- `aria-rowindex` y `aria-colindex`;
+- `aria-selected` para la posición activa;
+- `aria-readonly` para las pistas fijas;
+- `aria-invalid` para respuestas definitivas incorrectas;
+- `aria-label` con fila, columna, valor y candidatos cuando corresponda.
+
+El grid queda asociado a instrucciones de teclado que describen flechas, números 1–9, tecla `N` y borrado.
+
+La gestión de foco complementaria sigue estas reglas:
+
+- `Escape` cierra el menú móvil y devuelve el foco a su botón cuando estaba abierto;
+- el panel numérico devuelve el foco a la casilla activa después de introducir un valor o candidato;
+- **Borrar casilla** devuelve el foco al tablero;
+- **Comprobar partida** y **Reiniciar demo** llevan el foco al mensaje de estado para comunicar el resultado de la acción.
+
+La selección del tablero continúa usando roving `tabindex`: una sola casilla permanece en el orden de tabulación y las flechas mueven la selección entre las 81 posiciones.
+
+Estas medidas mejoran la accesibilidad operativa, pero no constituyen una declaración de conformidad WCAG ni sustituyen una revisión formal con lectores de pantalla y pruebas manuales.
 
 ## Pruebas prioritarias
 
@@ -138,10 +146,13 @@ La sección educativa utiliza encabezados, artículos y ejemplos textuales; las 
 5. compatibilidad con partidas guardadas anteriores sin notas;
 6. rechazo de datos persistidos inválidos o corruptos;
 7. funcionamiento cuando `localStorage` no está disponible;
-8. navegación completa con teclado;
-9. funcionamiento en móvil y escritorio;
-10. legibilidad de la sección de técnicas en diferentes tamaños y configuraciones de accesibilidad;
-11. accesibilidad de candidatos, mensajes y estados.
+8. navegación completa con teclado y roving `tabindex`;
+9. retorno de foco al cerrar el menú con `Escape`;
+10. continuidad de foco entre panel numérico, tablero y estado de comprobación;
+11. exposición correcta de fila, columna, selección, solo lectura e invalidez en tecnologías de apoyo;
+12. funcionamiento en móvil y escritorio;
+13. legibilidad de la sección de técnicas en diferentes tamaños y configuraciones de accesibilidad;
+14. accesibilidad de candidatos, mensajes y estados.
 
 ## Crecimiento
 
