@@ -176,7 +176,7 @@ const errorValue = document.querySelector('#errorValue');
 
 let values = [...puzzle];
 let selectedIndex = puzzle.findIndex(value => value === 0);
-let errors = 0;
+let errorCells = new Set();
 let cells = [];
 let hasProgress = false;
 let gameCompleted = false;
@@ -209,7 +209,7 @@ function updateProgress() {
   gameCompleted = correct === editable;
 
   if (progressValue) progressValue.textContent = `${percent}%`;
-  if (errorValue) errorValue.textContent = String(errors);
+  if (errorValue) errorValue.textContent = String(errorCells.size);
 
   if (gameCompleted && gameStatus) {
     gameStatus.textContent = '¡Demo completada! Has resuelto correctamente el tablero.';
@@ -264,9 +264,14 @@ function enterNumber(number) {
   cell?.classList.remove('invalid');
 
   if (number !== solution[selectedIndex]) {
-    errors += 1;
+    const newFailedCell = !errorCells.has(selectedIndex);
+    errorCells.add(selectedIndex);
     cell?.classList.add('invalid');
-    if (gameStatus) gameStatus.textContent = 'Ese número no corresponde a esta casilla. Puedes probar otra opción.';
+    if (gameStatus) {
+      gameStatus.textContent = newFailedCell
+        ? 'Ese número no corresponde a esta casilla. La casilla se añadió al registro de casillas falladas.'
+        : 'Ese número no corresponde a esta casilla. Esta casilla ya estaba registrada como fallada.';
+    }
   } else if (gameStatus) {
     gameStatus.textContent = `Número ${number} colocado correctamente.`;
   }
@@ -278,7 +283,7 @@ function eraseSelected() {
   if (selectedIndex < 0 || puzzle[selectedIndex] !== 0 || values[selectedIndex] === 0) return;
   values[selectedIndex] = 0;
   cells[selectedIndex]?.classList.remove('invalid');
-  if (gameStatus) gameStatus.textContent = 'Casilla borrada.';
+  if (gameStatus) gameStatus.textContent = 'Casilla borrada. El historial de casillas falladas no cambia.';
   paintBoard();
 }
 
@@ -300,9 +305,9 @@ function checkBoard() {
     gameCompleted = true;
     gameStatus.textContent = '¡Tablero completo y correcto! Has terminado la demostración.';
   } else if (incorrect > 0) {
-    gameStatus.textContent = `Hay ${incorrect} ${incorrect === 1 ? 'casilla incorrecta' : 'casillas incorrectas'} y ${empty} por completar.`;
+    gameStatus.textContent = `Hay ${incorrect} ${incorrect === 1 ? 'casilla incorrecta actualmente' : 'casillas incorrectas actualmente'} y ${empty} por completar. Comprobar no modifica el registro de casillas falladas.`;
   } else {
-    gameStatus.textContent = `Todo lo colocado es correcto. Faltan ${empty} ${empty === 1 ? 'casilla' : 'casillas'} por completar.`;
+    gameStatus.textContent = `Todo lo colocado es correcto. Faltan ${empty} ${empty === 1 ? 'casilla' : 'casillas'} por completar. Comprobar no modifica el registro de casillas falladas.`;
   }
 }
 
@@ -313,13 +318,13 @@ function resetGame() {
   }
 
   values = [...puzzle];
-  errors = 0;
+  errorCells = new Set();
   hasProgress = false;
   gameCompleted = false;
   selectedIndex = puzzle.findIndex(value => value === 0);
   cells.forEach(cell => cell.classList.remove('invalid'));
   paintBoard();
-  if (gameStatus) gameStatus.textContent = 'La partida de demostración se reinició. El tablero actual se mantiene.';
+  if (gameStatus) gameStatus.textContent = 'La partida de demostración se reinició. El tablero actual se mantiene y el registro de casillas falladas volvió a cero.';
 }
 
 function moveSelection(key) {
