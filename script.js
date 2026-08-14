@@ -94,8 +94,8 @@ ruleButtons.forEach(button => {
 renderRule('row');
 
 // Sudoku de demostración.
-// En cada carga se transforma aleatoriamente una pareja tablero-solución válida.
-// Las transformaciones preservan la estructura y la solución del Sudoku.
+// Se restaura una partida local válida si existe; en caso contrario se genera
+// una variante mediante transformaciones que preservan la solución del Sudoku.
 const basePuzzle = [
   5,3,0,0,7,0,0,0,0,
   6,0,0,1,9,5,0,0,0,
@@ -119,6 +119,8 @@ const baseSolution = [
   2,8,7,4,1,9,6,3,5,
   3,4,5,2,8,6,1,7,9
 ];
+
+const GAME_STORAGE_KEY = 'sudolux-demo-v1';
 
 function shuffle(array) {
   const copy = [...array];
@@ -161,9 +163,91 @@ function buildRandomDemo(puzzleSource, solutionSource) {
   };
 }
 
-const randomizedDemo = buildRandomDemo(basePuzzle, baseSolution);
-const puzzle = randomizedDemo.puzzle;
-const solution = randomizedDemo.solution;
+function validBoardArray(value, allowZero = true) {
+  return Array.isArray(value)
+    && value.length === 81
+    && value.every(number => Number.isInteger(number) && number >= (allowZero ? 0 : 1) && number <= 9);
+}
+
+function validSolvedGrid(solution) {
+  if (!validBoardArray(solution, false)) return false;
+  const expected = '123456789';
+  const validGroup = group => [...group].sort((a, b) => a - b).join('') === expected;
+
+  for (let row = 0; row < 9; row += 1) {
+    if (!validGroup(solution.slice(row * 9, row * 9 + 9))) return false;
+  }
+  for (let column = 0; column < 9; column += 1) {
+    if (!validGroup(Array.from({length: 9}, (_, row) => solution[row * 9 + column]))) return false;
+  }
+  for (let blockRow = 0; blockRow < 3; blockRow += 1) {
+    for (let blockColumn = 0; blockColumn < 3; blockColumn += 1) {
+      const block = [];
+      for (let row = 0; row < 3; row += 1) {
+        for (let column = 0; column < 3; column += 1) {
+          block.push(solution[(blockRow * 3 + row) * 9 + blockColumn * 3 + column]);
+        }
+      }
+      if (!validGroup(block)) return false;
+    }
+  }
+  return true;
+}
+
+function normalizeStoredGame(value) {
+  if (!value || typeof value !== 'object') return null;
+  const {puzzle, solution, values, errorCells, selectedIndex} = value;
+  if (!validBoardArray(puzzle) || !validSolvedGrid(solution) || !validBoardArray(values)) return null;
+
+  const cluesAreValid = puzzle.every((number, index) => number === 0 || (number === solution[index] && values[index] === number));
+  if (!cluesAreValid) return null;
+
+  const normalizedErrors = Array.isArray(errorCells)
+    ? [...new Set(errorCells.filter(index => Number.isInteger(index) && index >= 0 && index < 81 && puzzle[index] === 0))]
+    : [];
+  const normalizedSelection = Number.isInteger(selectedIndex) && selectedIndex >= 0 && selectedIndex < 81
+    ? selectedIndex
+    : puzzle.findIndex(number => number === 0);
+
+  return {
+    puzzle: [...puzzle],
+    solution: [...solution],
+    values: [...values],
+    errorCells: normalizedErrors,
+    selectedIndex: normalizedSelection
+  };
+}
+
+function readStoredGame() {
+  try {
+    const raw = localStorage.getItem(GAME_STORAGE_KEY);
+    return raw ? normalizeStoredGame(JSON.parse(raw)) : null;
+  } catch {
+    return null;
+  }
+}
+
+function writeStoredGame(state) {
+  try {
+    localStorage.setItem(GAME_STORAGE_KEY, JSON.stringify(state));
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+function clearStoredGame() {
+  try {
+    localStorage.removeItem(GAME_STORAGE_KEY);
+  } catch {
+    // La demo continúa en memoria si el almacenamiento local no está disponible.
+  }
+}
+
+const restoredGame = readStoredGame();
+const generatedGame = restoredGame || buildRandomDemo(basePuzzle, baseSolution);
+const puzzle = generatedGame.puzzle;
+const solution = generatedGame.solution;
 
 const sudokuBoard = document.querySelector('#sudokuBoard');
 const numberPad = document.querySelector('#numberPad');
@@ -179,9 +263,9 @@ const gameStats = document.querySelector('.game-stats');
 if (errorLabel) errorLabel.textContent = 'Casillas falladas';
 if (gameStats) gameStats.setAttribute('aria-label', 'Estado de la partida: progreso y casillas falladas');
 
-let values = [...puzzle];
-let selectedIndex = puzzle.findIndex(value => value === 0);
-let errorCells = new Set();
+let values = restoredGame ? [...restoredGame.values] : [...puzzle];
+let selectedIndex = restoredGame?.selectedIndex ?? puzzle.findIndex(value => value === 0);
+let errorCells = new Set(restoredGame?.errorCells || []);
 let cells = [];
 let hasProgress = false;
 let gameCompleted = false;
@@ -207,6 +291,22 @@ function updateProgressState() {
   hasProgress = values.some((value, index) => puzzle[index] === 0 && value !== 0);
 }
 
+function persistGameState() {
+  if (gameCompleted) {
+    clearStoredGame();
+    return;
+  }
+
+  writeStoredGame({
+    version: 1,
+    puzzle,
+    solution,
+    values,
+    errorCells: [...errorCells],
+    selectedIndex
+  });
+}
+
 function updateProgress() {
   const editable = puzzle.reduce((total, value) => total + (value === 0 ? 1 : 0), 0);
   const correct = values.reduce((total, value, index) => total + (puzzle[index] === 0 && value === solution[index] ? 1 : 0), 0);
@@ -227,17 +327,20 @@ function paintBoard() {
     const selected = coordinates(selectedIndex);
     const related = row === selected.row || column === selected.column || sameBlock(index, selectedIndex);
     const same = values[selectedIndex] !== 0 && values[index] === values[selectedIndex];
+    const incorrect = puzzle[index] === 0 && values[index] !== 0 && values[index] !== solution[index];
 
     cell.textContent = values[index] || '';
     cell.classList.toggle('selected', index === selectedIndex);
     cell.classList.toggle('related', index !== selectedIndex && related);
     cell.classList.toggle('same', index !== selectedIndex && same);
     cell.classList.toggle('given', puzzle[index] !== 0);
+    cell.classList.toggle('invalid', incorrect);
     cell.setAttribute('aria-label', cellLabel(index));
     cell.tabIndex = index === selectedIndex ? 0 : -1;
   });
   updateProgressState();
   updateProgress();
+  persistGameState();
 }
 
 function selectCell(index, focus = false) {
@@ -264,14 +367,11 @@ function enterNumber(number) {
     return;
   }
 
-  const cell = cells[selectedIndex];
   values[selectedIndex] = number;
-  cell?.classList.remove('invalid');
 
   if (number !== solution[selectedIndex]) {
     const newFailedCell = !errorCells.has(selectedIndex);
     errorCells.add(selectedIndex);
-    cell?.classList.add('invalid');
     if (gameStatus) {
       gameStatus.textContent = newFailedCell
         ? 'Ese número no corresponde a esta casilla. La casilla se añadió al registro de casillas falladas.'
@@ -287,7 +387,6 @@ function enterNumber(number) {
 function eraseSelected() {
   if (selectedIndex < 0 || puzzle[selectedIndex] !== 0 || values[selectedIndex] === 0) return;
   values[selectedIndex] = 0;
-  cells[selectedIndex]?.classList.remove('invalid');
   if (gameStatus) gameStatus.textContent = 'Casilla borrada. El historial de casillas falladas no cambia.';
   paintBoard();
 }
@@ -297,17 +396,16 @@ function checkBoard() {
   let empty = 0;
 
   values.forEach((value, index) => {
-    cells[index]?.classList.remove('invalid');
     if (puzzle[index] !== 0) return;
     if (value === 0) empty += 1;
-    else if (value !== solution[index]) {
-      incorrect += 1;
-      cells[index]?.classList.add('invalid');
-    }
+    else if (value !== solution[index]) incorrect += 1;
   });
+
+  paintBoard();
 
   if (incorrect === 0 && empty === 0) {
     gameCompleted = true;
+    clearStoredGame();
     gameStatus.textContent = '¡Tablero completo y correcto! Has terminado la demostración.';
   } else if (incorrect > 0) {
     gameStatus.textContent = `Hay ${incorrect} ${incorrect === 1 ? 'casilla incorrecta actualmente' : 'casillas incorrectas actualmente'} y ${empty} por completar. Comprobar no modifica el registro de casillas falladas.`;
@@ -327,7 +425,6 @@ function resetGame() {
   hasProgress = false;
   gameCompleted = false;
   selectedIndex = puzzle.findIndex(value => value === 0);
-  cells.forEach(cell => cell.classList.remove('invalid'));
   paintBoard();
   if (gameStatus) gameStatus.textContent = 'La partida de demostración se reinició. El tablero actual se mantiene y el registro de casillas falladas volvió a cero.';
 }
@@ -343,8 +440,8 @@ function moveSelection(key) {
   selectCell(nextRow * 9 + nextColumn, true);
 }
 
-// Protección de la partida: al recargar, cerrar o abandonar la página,
-// el navegador solicita confirmación si existen movimientos sin terminar.
+// La partida en curso se guarda localmente. beforeunload se mantiene como
+// protección adicional ante una salida accidental mientras existen movimientos.
 window.addEventListener('beforeunload', event => {
   if (!hasProgress || gameCompleted) return;
   event.preventDefault();
@@ -377,6 +474,9 @@ if (sudokuBoard) {
     cells.push(cell);
   });
   paintBoard();
+  if (restoredGame && gameStatus) {
+    gameStatus.textContent = 'Partida guardada restaurada. Puedes continuar desde donde la dejaste.';
+  }
 }
 
 numberPad?.querySelectorAll('[data-number]').forEach(button => {
