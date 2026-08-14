@@ -4,7 +4,7 @@
 
 **Demo web funcional en desarrollo activo.**
 
-La web ya integra contenido introductorio, reglas interactivas, técnicas básicas de resolución y una partida clásica 9 × 9 jugable. La partida en curso puede persistir localmente en el navegador e incluye valores definitivos y candidatos. La aplicación móvil permanece como una expansión futura y no es requisito para que la versión web tenga valor propio.
+La web ya integra contenido introductorio, reglas interactivas, técnicas básicas de resolución, cinco guías educativas públicas y una partida clásica 9 × 9 jugable. La partida en curso puede persistir localmente en el navegador e incluye valores definitivos y candidatos. La aplicación móvil permanece como una expansión futura y no es requisito para que la versión web tenga valor propio.
 
 ## Enfoque de desarrollo
 
@@ -14,17 +14,44 @@ Sudolux se desarrolla de forma progresiva, priorizando una base clásica de Sudo
 
 La versión web se organiza en archivos con responsabilidades separadas:
 
-- `index.html`: estructura semántica de la portada, contenido informativo, técnicas básicas, hero orbital y controles de la demo jugable;
+- `index.html`: portada, contenido informativo, acceso a guías, técnicas, hero orbital y controles de la demo;
 - `styles.css`: estilos generales, secciones, tablero, candidatos y responsive;
-- `techniques.css`: estilos exclusivos de la sección educativa de técnicas de resolución;
+- `techniques.css`: estilos de la sección educativa de técnicas;
+- `guide-cards.css`: tarjetas de acceso a las guías desde la portada;
+- `resources.css`: presentación compartida por las páginas educativas independientes;
 - `hero-orbit.css`: estilos exclusivos del sistema orbital del hero;
 - `script.js`: navegación, demostración de reglas, lógica del Sudoku, candidatos y persistencia local segura;
 - `game-accessibility.js`: semántica ARIA complementaria y gestión de foco específica del tablero;
+- `como-jugar-sudoku.html`, `reglas-sudoku.html`, `sudoku-para-principiantes.html`, `tecnicas-basicas-sudoku.html` y `sudoku-y-actividad-mental.html`: recursos educativos públicos e indexables;
 - `privacy/index.html`: política pública de privacidad;
 - `privacy/styles.css`: estilos exclusivos de la política de privacidad;
-- `sitemap.xml`: URLs públicas indexables;
+- `sitemap.xml`: portada, cinco guías y privacidad;
 - `favicon.svg` y `favicon.ico`: identidad gráfica;
 - `.nojekyll`: publicación estática directa mediante GitHub Pages.
+
+## Guías públicas e indexación
+
+Las cinco guías tienen una función educativa distinta:
+
+1. **Cómo jugar Sudoku:** objetivo, secuencia inicial, candidatos y práctica en Sudolux.
+2. **Reglas del Sudoku:** fila, columna y bloque como restricciones simultáneas.
+3. **Sudoku para principiantes:** rutina inicial, uso prudente de notas y único posible.
+4. **Técnicas básicas:** restricciones, candidatos, descarte y único posible con mayor profundidad.
+5. **Sudoku y actividad mental:** habilidades implicadas y límites de las afirmaciones sobre efectos cognitivos.
+
+Cada página utiliza:
+
+- `<title>` y meta description propios;
+- canonical absoluto;
+- `robots="index, follow"`;
+- Open Graph/Twitter básicos;
+- un único `<h1>`;
+- navegación interna entre las cinco guías;
+- enlaces de retorno a la portada y a la demo;
+- estructura semántica con `main`, secciones y `aside` de navegación;
+- el módulo compartido de accesibilidad de Neuronova Apps.
+
+El sitemap publica siete URLs: portada, cinco guías y privacidad. Las páginas no duplican la lógica del juego ni calculan pistas. Su objetivo es ampliar el contenido indexable y conectar conceptos con la práctica interactiva.
 
 ## Capa educativa de técnicas
 
@@ -151,9 +178,10 @@ Estas medidas mejoran la accesibilidad operativa, pero no constituyen una declar
 9. retorno de foco al cerrar el menú con `Escape`;
 10. continuidad de foco entre panel numérico, tablero y estado de comprobación;
 11. exposición correcta de fila, columna, selección, solo lectura e invalidez en tecnologías de apoyo;
-12. funcionamiento en móvil y escritorio;
-13. legibilidad de la sección de técnicas en diferentes tamaños y configuraciones de accesibilidad;
-14. accesibilidad de candidatos, mensajes y estados.
+12. títulos, descriptions y canonicals únicos en las cinco guías;
+13. enlaces internos y retorno a la demo sin rutas rotas;
+14. sitemap con las siete URLs públicas;
+15. funcionamiento de guías y demo en móvil y escritorio.
 
 ## Crecimiento
 
