@@ -7,6 +7,7 @@
 - identidad visual;
 - teoría del Sudoku;
 - reglas interactivas;
+- técnicas básicas de resolución;
 - tablero clásico de demostración;
 - variantes aleatorias válidas;
 - protección de partida en progreso;
@@ -25,12 +26,13 @@ Ya implementado:
 - fallback en memoria cuando el almacenamiento local no está disponible;
 - notas/candidatos 1–9 por casilla;
 - modo Notas alternable desde botón o teclado;
-- persistencia y restauración de candidatos junto con la partida.
+- persistencia y restauración de candidatos junto con la partida;
+- guía educativa de restricciones, candidatos, descarte y único posible.
 
 Pendiente:
 
 - mejoras adicionales de selección y estados;
-- pistas comprensibles;
+- pistas comprensibles aplicadas al tablero actual;
 - control de validación configurable.
 
 ## Etapa 3 — Experiencia ampliada
@@ -62,4 +64,4 @@ Pendiente:
 
 ## Prioridad
 
-La estabilidad del generador, la claridad de interacción y la calidad de futuras pistas tienen prioridad sobre aumentar rápidamente la cantidad de modos.
+La estabilidad del generador, la claridad de interacción y la calidad de futuras pistas aplicadas a la partida tienen prioridad sobre aumentar rápidamente la cantidad de modos.
