@@ -173,6 +173,11 @@ const resetButton = document.querySelector('#resetButton');
 const gameStatus = document.querySelector('#gameStatus');
 const progressValue = document.querySelector('#progressValue');
 const errorValue = document.querySelector('#errorValue');
+const errorLabel = errorValue?.previousElementSibling;
+const gameStats = document.querySelector('.game-stats');
+
+if (errorLabel) errorLabel.textContent = 'Casillas falladas';
+if (gameStats) gameStats.setAttribute('aria-label', 'Estado de la partida: progreso y casillas falladas');
 
 let values = [...puzzle];
 let selectedIndex = puzzle.findIndex(value => value === 0);
