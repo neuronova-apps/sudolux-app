@@ -51,6 +51,7 @@
       <nav id="main-nav" class="main-nav" aria-label="Navegación principal">
         <a href="#conoce">Conoce</a>
         <a href="#reglas">Cómo jugar</a>
+        <a href="#tecnicas">Técnicas</a>
         <a href="#mente">Agilidad mental</a>
         <a href="#demo">Jugar demo</a>
       </nav>
@@ -65,10 +66,10 @@
         <div class="hero-copy reveal">
           <p class="eyebrow"><span class="pulse-dot" aria-hidden="true"></span> Demo web funcional · Lógica · Atención · Entretenimiento</p>
           <h1>Nueve números. <span>Una cuadrícula llena de posibilidades.</span></h1>
-          <p class="lead">Sudolux combina aprendizaje y juego: explica la lógica del Sudoku, muestra sus tres reglas fundamentales y permite resolver una partida clásica 9 × 9 directamente en la web.</p>
+          <p class="lead">Sudolux combina aprendizaje y juego: explica la lógica del Sudoku, muestra sus tres reglas fundamentales, enseña técnicas básicas de resolución y permite resolver una partida clásica 9 × 9 directamente en la web.</p>
           <div class="hero-actions">
             <a class="button primary" href="#demo">Probar Sudoku <span aria-hidden="true">→</span></a>
-            <a class="button ghost" href="#conoce">Entender el juego</a>
+            <a class="button ghost" href="#tecnicas">Aprender técnicas</a>
           </div>
           <div class="hero-metrics" aria-label="Estructura clásica del Sudoku">
             <div><strong>9 × 9</strong><span>cuadrícula clásica</span></div>
@@ -152,6 +153,58 @@
           </div>
           <div id="ruleBoard" class="mini-board" aria-hidden="true"></div>
           <p id="ruleText" class="rule-description" aria-live="polite">Una fila debe contener los números del 1 al 9 sin repetir.</p>
+        </div>
+      </div>
+    </section>
+
+    <section id="tecnicas" class="section techniques-section">
+      <div class="container">
+        <div class="section-heading reveal">
+          <div>
+            <p class="eyebrow">Técnicas para empezar</p>
+            <h2>De las reglas a una decisión concreta.</h2>
+          </div>
+          <p>Resolver no consiste en adivinar. Empieza observando qué números ya bloquean una casilla, anota las posibilidades que quedan y reduce esas opciones hasta encontrar una decisión justificada.</p>
+        </div>
+
+        <div class="technique-grid">
+          <article class="technique-card reveal">
+            <span class="technique-index">01</span>
+            <h3>Observa las restricciones</h3>
+            <p>Antes de escribir, revisa la fila, la columna y el bloque 3 × 3 de la casilla. Todo número que ya aparezca en cualquiera de esos tres grupos queda descartado.</p>
+            <div class="technique-example"><strong>Ejemplo</strong><p>Si en la fila ya están 1, 3, 5 y 8, esos números no pueden ocupar esa casilla.</p></div>
+          </article>
+
+          <article class="technique-card reveal">
+            <span class="technique-index">02</span>
+            <h3>Anota candidatos</h3>
+            <p>Los números que todavía cumplen las tres reglas son candidatos. En Sudolux puedes activar <strong>Notas</strong> o pulsar <kbd>N</kbd> y registrar esas posibilidades sin convertirlas en respuestas definitivas.</p>
+            <div class="candidate-example" aria-label="Ejemplo de candidatos 2, 4 y 7">
+              <span></span><span>2</span><span></span><span>4</span><span></span><span></span><span>7</span><span></span><span></span>
+            </div>
+          </article>
+
+          <article class="technique-card reveal">
+            <span class="technique-index">03</span>
+            <h3>Descarta posibilidades</h3>
+            <p>Cada nuevo valor colocado puede eliminar candidatos cercanos. Vuelve a comprobar fila, columna y bloque para mantener solo las opciones que siguen siendo válidas.</p>
+            <div class="technique-example"><strong>Idea clave</strong><p>Si una casilla tenía 2, 4 y 7 y aparece un 4 en su columna, quedan 2 y 7.</p></div>
+          </article>
+
+          <article class="technique-card reveal">
+            <span class="technique-index">04</span>
+            <h3>Busca un único posible</h3>
+            <p>Cuando una casilla se queda con un solo candidato, ese número puede colocarse como valor definitivo. Es una de las deducciones básicas más útiles para comenzar.</p>
+            <div class="single-example" aria-label="Ejemplo: el único candidato es 7"><span>7</span><small>único candidato</small></div>
+          </article>
+        </div>
+
+        <div class="technique-practice reveal">
+          <div>
+            <strong>Secuencia recomendada</strong>
+            <p>Observar → anotar → descartar → resolver. Repite el ciclo cada vez que una nueva respuesta cambie las posibilidades del tablero.</p>
+          </div>
+          <a class="button ghost" href="#demo">Practicar con Notas <span aria-hidden="true">→</span></a>
         </div>
       </div>
     </section>
@@ -261,6 +314,7 @@
         <h2>Explorar</h2>
         <a href="#conoce">Qué es Sudoku</a>
         <a href="#reglas">Cómo jugar</a>
+        <a href="#tecnicas">Técnicas básicas</a>
         <a href="#mente">Actividad mental</a>
         <a href="#demo">Demo web</a>
       </div>
