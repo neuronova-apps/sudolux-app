@@ -131,7 +131,8 @@ La gestión de foco complementaria sigue estas reglas:
 - `Escape` cierra el menú móvil y devuelve el foco a su botón cuando estaba abierto;
 - el panel numérico devuelve el foco a la casilla activa después de introducir un valor o candidato;
 - **Borrar casilla** devuelve el foco al tablero;
-- **Comprobar partida** y **Reiniciar demo** llevan el foco al mensaje de estado para comunicar el resultado de la acción.
+- **Comprobar partida** lleva el foco al mensaje de estado para comunicar el resultado de la acción;
+- **Reiniciar demo** conserva el foco del control, evitando interferir cuando la confirmación se cancela.
 
 La selección del tablero continúa usando roving `tabindex`: una sola casilla permanece en el orden de tabulación y las flechas mueven la selección entre las 81 posiciones.
 
