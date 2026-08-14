@@ -1,5 +1,11 @@
 # Desarrollo de Sudolux
 
+## Estado actual
+
+**Demo web funcional en desarrollo activo.**
+
+La web ya integra contenido introductorio, reglas interactivas y una partida clásica 9 × 9 jugable. La aplicación móvil permanece como una expansión futura y no es requisito para que la versión web tenga valor propio.
+
 ## Enfoque de desarrollo
 
 Sudolux se desarrolla de forma progresiva, priorizando una base clásica de Sudoku estable antes de añadir funciones avanzadas.
@@ -26,7 +32,7 @@ La versión web se publica desde la rama `main` mediante GitHub Pages en `https:
 
 ## Componentes actuales
 
-La versión web incluye:
+La demo web funcional incluye:
 
 - interfaz tecnológica y responsive;
 - sección teórica;
@@ -79,6 +85,6 @@ El tablero debe procurar:
 5. protección contra pérdida accidental de progreso;
 6. accesibilidad de mensajes de error y finalización.
 
-## Estado
+## Crecimiento
 
-Desarrollo activo. La web seguirá siendo deliberadamente más limitada que la aplicación móvil.
+Las funciones futuras podrán ampliarse en la web, en una futura aplicación móvil o en ambas. La prioridad sigue siendo consolidar claridad, accesibilidad y estabilidad antes de añadir complejidad.
