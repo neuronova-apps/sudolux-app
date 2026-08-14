@@ -8,6 +8,9 @@
 - teoría del Sudoku;
 - reglas interactivas;
 - técnicas básicas de resolución;
+- cinco guías educativas públicas e indexables;
+- enlaces internos entre portada, guías y demo;
+- sitemap con las páginas educativas públicas;
 - tablero clásico de demostración;
 - variantes aleatorias válidas;
 - protección de partida en progreso;
