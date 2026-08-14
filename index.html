@@ -190,7 +190,7 @@
             <p class="eyebrow">Demo web funcional</p>
             <h2>Resuelve una partida clásica directamente en Sudolux.</h2>
           </div>
-          <p>La versión actual ofrece un tablero clásico 9 × 9 jugable. Si haces movimientos, la partida en curso se guarda localmente en este navegador para que puedas continuar después de recargar.</p>
+          <p>La versión actual ofrece un tablero clásico 9 × 9 con candidatos y guardado local. Los movimientos y notas se conservan en este navegador para continuar después de recargar.</p>
         </div>
 
         <div class="game-shell reveal">
@@ -198,7 +198,7 @@
             <div>
               <span class="demo-badge"><i></i> Demo web funcional</span>
               <h3>Sudoku clásico</h3>
-              <p>Selecciona una casilla vacía y usa los números o el teclado. Puedes verificar la partida cuando quieras.</p>
+              <p>Selecciona una casilla y usa los números como respuesta definitiva o activa Notas para registrar candidatos. También puedes usar la tecla N para alternar el modo.</p>
             </div>
             <div class="game-stats" aria-label="Estado de la partida: progreso y casillas falladas">
               <div><span>Completado</span><strong id="progressValue">0%</strong></div>
@@ -219,12 +219,13 @@
                 <button type="button" data-number="4">4</button><button type="button" data-number="5">5</button><button type="button" data-number="6">6</button>
                 <button type="button" data-number="7">7</button><button type="button" data-number="8">8</button><button type="button" data-number="9">9</button>
               </div>
+              <button id="noteModeButton" class="game-button note-mode-button" type="button" aria-pressed="false">Notas · desactivadas</button>
               <button id="eraseButton" class="game-button" type="button">Borrar casilla</button>
               <button id="checkButton" class="game-button primary-control" type="button">Comprobar partida</button>
               <button id="resetButton" class="game-button" type="button">Reiniciar demo</button>
               <div class="demo-limit">
-                <strong>Guardado local</strong>
-                <p>La partida en curso, los movimientos y las casillas falladas se guardan solo en este navegador. No requiere cuenta ni sincronización externa.</p>
+                <strong>Notas y guardado local</strong>
+                <p>Los candidatos no cuentan como respuestas ni errores. Partida, movimientos, notas y casillas falladas se guardan solo en este navegador, sin cuenta ni sincronización externa.</p>
               </div>
             </aside>
           </div>
@@ -240,7 +241,7 @@
         <div>
           <p class="eyebrow">Expansión futura</p>
           <h2>La demo web ya funciona. Sudolux puede crecer desde aquí.</h2>
-          <p>Una futura aplicación móvil podrá ampliar la experiencia con dificultades, partidas guardadas, notas, ayudas, estadísticas, retos, personalización y otros modos. Estas funciones seguirán marcadas como futuras hasta estar implementadas y verificadas.</p>
+          <p>Una futura aplicación móvil podrá ampliar la experiencia con dificultades, gestión de múltiples partidas, ayudas, estadísticas, retos, personalización y otros modos. Estas funciones seguirán marcadas como futuras hasta estar implementadas y verificadas.</p>
           <span class="coming-soon" role="status">Demo web funcional en desarrollo activo</span>
         </div>
       </div>
