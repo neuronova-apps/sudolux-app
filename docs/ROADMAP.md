@@ -27,11 +27,14 @@ Ya implementado:
 - notas/candidatos 1–9 por casilla;
 - modo Notas alternable desde botón o teclado;
 - persistencia y restauración de candidatos junto con la partida;
-- guía educativa de restricciones, candidatos, descarte y único posible.
+- guía educativa de restricciones, candidatos, descarte y único posible;
+- semántica ARIA específica del grid 9 × 9;
+- estados accesibles de fila, columna, selección, solo lectura e invalidez;
+- flujo de foco reforzado entre menú, tablero, panel numérico y mensajes de estado.
 
 Pendiente:
 
-- mejoras adicionales de selección y estados;
+- validación manual formal con lectores de pantalla y distintas combinaciones navegador/tecnología de apoyo;
 - pistas comprensibles aplicadas al tablero actual;
 - control de validación configurable.
 
@@ -64,4 +67,4 @@ Pendiente:
 
 ## Prioridad
 
-La estabilidad del generador, la claridad de interacción y la calidad de futuras pistas aplicadas a la partida tienen prioridad sobre aumentar rápidamente la cantidad de modos.
+La estabilidad del generador, la claridad de interacción, la validación accesible y la calidad de futuras pistas aplicadas a la partida tienen prioridad sobre aumentar rápidamente la cantidad de modos.
