@@ -16,8 +16,12 @@ Incluye:
 - demostración visual de las reglas;
 - información sobre razonamiento, atención y actividad mental;
 - una partida clásica de demostración;
-- generación de una variante válida distinta en cada nueva carga;
-- protección ante salida o recarga cuando existe progreso;
+- generación de una variante válida cuando no existe una partida activa guardada;
+- guardado local de una partida con progreso;
+- restauración del tablero, movimientos, casillas falladas y selección tras recargar;
+- validación de los datos persistidos antes de restaurarlos;
+- funcionamiento en memoria cuando `localStorage` no está disponible;
+- protección adicional ante salida o recarga cuando existe progreso;
 - navegación mediante teclado;
 - panel numérico;
 - validación inmediata de cada número ingresado;
@@ -28,6 +32,8 @@ Incluye:
 
 La métrica **Casillas falladas** cuenta cada posición una sola vez aunque se introduzcan varios números incorrectos en ella. Corregir o borrar la respuesta no elimina ese registro durante la partida. **Comprobar partida** muestra cuántas respuestas incorrectas siguen presentes en ese momento, pero no añade errores al historial.
 
+La persistencia local se limita a la partida activa. No constituye una cuenta, sincronización entre dispositivos, historial de partidas ni estadísticas globales. Cuando el tablero queda sin progreso tras reiniciar o se completa correctamente, el guardado local se elimina.
+
 ## Límites actuales de la web
 
 La demo web no incorpora todavía:
@@ -36,7 +42,9 @@ La demo web no incorpora todavía:
 - notas o candidatos;
 - pistas avanzadas;
 - cronómetro competitivo;
-- estadísticas persistentes;
+- estadísticas persistentes entre partidas;
+- historial de partidas;
+- sincronización entre dispositivos;
 - retos diarios;
 - ranking;
 - logros;
@@ -51,7 +59,7 @@ La aplicación móvil se mantiene como una posible expansión para una experienc
 - dificultades configurables;
 - notas y candidatos;
 - ayudas y pistas;
-- partidas guardadas;
+- gestión de múltiples partidas y sincronización;
 - estadísticas;
 - desafíos;
 - XP y logros;
