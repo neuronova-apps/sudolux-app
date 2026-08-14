@@ -1,8 +1,12 @@
 # Alcance de Sudolux
 
-## Alcance de la web
+## Estado actual
 
-La versión web de Sudolux tiene un propósito introductorio y de demostración.
+**Demo web funcional en desarrollo activo.**
+
+La versión web de Sudolux tiene un propósito introductorio, educativo y jugable. No es únicamente una página de exhibición: permite comprender las reglas y completar una partida clásica 9 × 9 de demostración.
+
+## Alcance de la web
 
 Incluye:
 
@@ -19,9 +23,9 @@ Incluye:
 - comprobación y reinicio del tablero actual;
 - accesibilidad compartida con Neuronova Apps.
 
-## Límites de la web
+## Límites actuales de la web
 
-La web no pretende convertirse en la experiencia completa de juego. Por ello no incorpora inicialmente:
+La demo web no incorpora todavía:
 
 - selector de dificultad;
 - notas o candidatos;
@@ -33,9 +37,11 @@ La web no pretende convertirse en la experiencia completa de juego. Por ello no 
 - logros;
 - múltiples modos de juego.
 
-## Alcance de la aplicación
+Estas funciones permanecen como ampliaciones futuras. Su incorporación podrá realizarse en la web, en una futura aplicación móvil o en ambas, según el alcance técnico y de producto.
 
-La aplicación será el espacio principal para ampliar Sudolux con:
+## Alcance de una futura aplicación
+
+La aplicación móvil se mantiene como una posible expansión para una experiencia más amplia y persistente. Podrá incorporar progresivamente:
 
 - dificultades configurables;
 - notas y candidatos;
@@ -48,10 +54,12 @@ La aplicación será el espacio principal para ampliar Sudolux con:
 - personalización;
 - modos adicionales.
 
+Estas funciones no deben presentarse como disponibles hasta estar implementadas y verificadas.
+
 ## Alcance de bienestar cognitivo
 
 Sudolux puede presentar el Sudoku como una actividad mentalmente estimulante y de entretenimiento activo. No debe afirmar que previene enfermedades, evita el deterioro cognitivo o sustituye recomendaciones profesionales de salud.
 
 ## Criterio de crecimiento
 
-Las nuevas funciones deben mantener claridad, estabilidad, accesibilidad y una separación comprensible entre la versión web de exhibición y la aplicación completa.
+Las nuevas funciones deben mantener claridad, estabilidad, accesibilidad y una separación comprensible entre lo disponible actualmente y lo que sigue en desarrollo, sin restar valor a la demo web funcional.
