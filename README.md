@@ -40,14 +40,16 @@ La demo web funcional incorpora:
 - información sobre razonamiento, atención y actividad mental;
 - una partida clásica de demostración;
 - generación aleatoria de una variante válida cuando no existe una partida activa guardada;
-- guardado local de la partida en curso cuando existen movimientos;
-- restauración del mismo tablero, movimientos, casillas falladas y selección después de recargar;
+- guardado local de la partida en curso cuando existen valores o candidatos;
+- restauración del mismo tablero, movimientos, candidatos, casillas falladas, selección y modo de entrada después de recargar;
 - validación de los datos guardados antes de restaurarlos;
 - funcionamiento en memoria si `localStorage` no está disponible;
 - protección adicional ante recarga, cierre o salida accidental cuando existe una partida en progreso;
 - navegación por teclado dentro del tablero;
 - ingreso mediante teclado o panel numérico;
-- validación inmediata de movimientos;
+- modo **Notas** para añadir o quitar candidatos del 1 al 9;
+- tecla `N` para alternar entre valor definitivo y candidatos;
+- validación inmediata únicamente de respuestas definitivas;
 - registro de casillas falladas sin duplicar intentos repetidos sobre la misma posición;
 - comprobación del estado actual del tablero sin alterar ese registro;
 - reinicio de la partida actual;
@@ -55,27 +57,34 @@ La demo web funcional incorpora:
 
 ## Modo de juego web
 
-La web mantiene una partida clásica activa. Cuando se introduce al menos un movimiento, Sudolux guarda localmente en el navegador el tablero generado, su solución, los movimientos realizados, el registro de casillas falladas y la casilla seleccionada. Al recargar, esos datos se validan y, si son coherentes, se restaura la misma partida.
+La web mantiene una partida clásica activa. El modo normal introduce respuestas definitivas y el modo **Notas** permite registrar candidatos en casillas editables vacías. Cada candidato funciona como interruptor: pulsar un número lo añade y pulsarlo nuevamente lo elimina.
 
-El almacenamiento utiliza la clave `sudolux-demo-v1` y permanece únicamente en el navegador. No requiere cuenta, backend ni sincronización externa. Si `localStorage` no puede utilizarse, la demo continúa funcionando durante la sesión sin persistencia.
+Las notas no se comparan con la solución, no aumentan **Casillas falladas** y no cuentan para el porcentaje completado. Al colocar un valor definitivo en una casilla, sus candidatos se eliminan. **Borrar casilla** elimina el contenido de la posición seleccionada, sea un valor o un conjunto de candidatos.
 
-Un tablero recién generado y sin movimientos no se conserva de forma permanente. Si la partida se reinicia hasta quedar sin progreso o se completa correctamente, el guardado local se elimina. De este modo, una recarga posterior puede generar otra variante válida.
+El modo Notas puede alternarse con el botón correspondiente o con la tecla `N`. Las teclas 1–9 y el panel numérico respetan el modo activo.
+
+Cuando existe al menos un valor o candidato, Sudolux guarda localmente en el navegador el tablero generado, su solución, los valores, candidatos, registro de casillas falladas, casilla seleccionada y modo de entrada. Al recargar, esos datos se validan y, si son coherentes, se restaura la misma partida.
+
+El almacenamiento utiliza la clave `sudolux-demo-v1` y permanece únicamente en el navegador. La estructura persistida está versionada internamente y mantiene compatibilidad con partidas guardadas antes de incorporar candidatos. No requiere cuenta, backend ni sincronización externa. Si `localStorage` no puede utilizarse, la demo continúa funcionando durante la sesión sin persistencia.
+
+Un tablero recién generado y sin valores ni candidatos no se conserva de forma permanente. Si la partida se reinicia hasta quedar sin progreso o se completa correctamente, el guardado local se elimina. De este modo, una recarga posterior puede generar otra variante válida.
 
 Mientras exista progreso sin completar, el navegador mantiene además la confirmación `beforeunload` como protección adicional frente a una salida accidental.
 
-La métrica **Casillas falladas** representa cuántas casillas distintas han recibido al menos una respuesta incorrecta durante la partida. Una misma casilla solo cuenta una vez aunque se prueben varios números erróneos. Si después se corrige o se borra, permanece en ese registro histórico hasta reiniciar la demo.
+La métrica **Casillas falladas** representa cuántas casillas distintas han recibido al menos una respuesta definitiva incorrecta durante la partida. Una misma casilla solo cuenta una vez aunque se prueben varios números erróneos. Si después se corrige o se borra, permanece en ese registro histórico hasta reiniciar la demo.
 
-El botón **Comprobar partida** evalúa el estado actual del tablero y resalta las casillas incorrectas que sigan presentes, pero no suma elementos al registro de casillas falladas. De este modo se separan el historial de dificultad de la partida y el estado actual del tablero.
+El botón **Comprobar partida** evalúa únicamente los valores definitivos del tablero. Las notas se consideran casillas aún por completar y no suman elementos al registro de casillas falladas.
 
-El botón **Reiniciar** no genera inmediatamente un Sudoku nuevo: restaura el mismo tablero, borra los movimientos, devuelve el registro de casillas falladas a cero y elimina la partida persistida al quedar sin progreso. Si ya existe progreso, solicita confirmación antes de borrar los movimientos realizados.
+El botón **Reiniciar** no genera inmediatamente un Sudoku nuevo: restaura el mismo tablero, borra valores y candidatos, devuelve el registro de casillas falladas a cero, desactiva el modo Notas y elimina la partida persistida al quedar sin progreso. Si ya existe progreso, solicita confirmación antes de borrar lo realizado.
 
 No incluye por ahora:
 
 - selector de dificultad;
-- notas o candidatos;
 - pistas automáticas;
 - cronómetro competitivo;
 - estadísticas persistentes entre partidas;
+- historial de partidas;
+- sincronización entre dispositivos;
 - desafíos diarios;
 - ranking;
 - logros;
@@ -87,14 +96,13 @@ Estas funciones permanecen como ampliaciones futuras del proyecto y podrán dist
 
 Sudolux utiliza el núcleo central de accesibilidad de Neuronova Apps. Entre sus opciones se encuentran tamaño de texto en tres niveles, alto contraste, espaciado de letras y palabras, interlineado amplio, lectura amigable para dislexia, guía de lectura, reducción de movimiento y foco de teclado reforzado.
 
-El tablero de demostración también contempla navegación mediante teclas de dirección, ingreso con teclas numéricas y borrado mediante `Backspace` o `Delete`.
+El tablero de demostración contempla navegación mediante teclas de dirección, ingreso con teclas numéricas, alternancia del modo Notas con `N` y borrado mediante `Backspace` o `Delete`. Las etiquetas accesibles de cada casilla incluyen sus candidatos cuando existen.
 
 ## Alcance de la aplicación
 
 La aplicación móvil se mantiene como una expansión futura de Sudolux y podrá incorporar progresivamente funciones que requieran una experiencia más amplia o persistente, como:
 
 - dificultades configurables;
-- notas y candidatos;
 - ayudas y pistas;
 - estadísticas de juego;
 - gestión de múltiples partidas y sincronización;
@@ -108,7 +116,7 @@ Estas funciones no se consideran disponibles hasta estar implementadas y verific
 
 ## Desarrollo
 
-Sudolux se encuentra en desarrollo activo. La web es actualmente una **demo web funcional** que combina presentación, contenido informativo y una partida clásica jugable con persistencia local de la partida en curso. La aplicación móvil continúa en la hoja de ruta como expansión futura, no como requisito para que la versión web tenga valor propio.
+Sudolux se encuentra en desarrollo activo. La web es actualmente una **demo web funcional** que combina presentación, contenido informativo y una partida clásica jugable con candidatos y persistencia local de la partida en curso. La aplicación móvil continúa en la hoja de ruta como expansión futura, no como requisito para que la versión web tenga valor propio.
 
 ## Ecosistema
 
