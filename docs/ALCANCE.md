@@ -4,7 +4,7 @@
 
 **Demo web funcional en desarrollo activo.**
 
-La versión web de Sudolux tiene un propósito introductorio, educativo y jugable. Permite comprender las reglas y completar una partida clásica 9 × 9 de demostración con valores definitivos, candidatos y persistencia local.
+La versión web de Sudolux tiene un propósito introductorio, educativo y jugable. Permite comprender las reglas, aprender técnicas básicas de resolución y completar una partida clásica 9 × 9 de demostración con valores definitivos, candidatos y persistencia local.
 
 ## Alcance de la web
 
@@ -14,6 +14,7 @@ Incluye:
 - estructura 9 × 9 y bloques 3 × 3;
 - reglas de fila, columna y bloque;
 - demostración visual de las reglas;
+- guía introductoria de resolución mediante restricciones, candidatos, descarte y único posible;
 - información sobre razonamiento, atención y actividad mental;
 - una partida clásica de demostración;
 - generación de una variante válida cuando no existe una partida activa guardada;
@@ -32,6 +33,8 @@ Incluye:
 - reinicio del tablero actual;
 - accesibilidad compartida con Neuronova Apps.
 
+La guía educativa propone la secuencia **observar → anotar → descartar → resolver**. Su objetivo es enseñar conceptos básicos antes o durante la práctica. No analiza automáticamente el tablero actual ni ofrece una pista calculada sobre el siguiente movimiento.
+
 Los candidatos son ayudas de trabajo de la persona usuaria. No se validan contra la solución, no cuentan como respuestas, no modifican el porcentaje completado y no incrementan **Casillas falladas**.
 
 La persistencia local se limita a la partida activa. No constituye una cuenta, sincronización entre dispositivos, historial de partidas ni estadísticas globales. Cuando el tablero queda sin valores ni candidatos tras reiniciar o se completa correctamente, el guardado local se elimina.
@@ -41,7 +44,7 @@ La persistencia local se limita a la partida activa. No constituye una cuenta, s
 La demo web no incorpora todavía:
 
 - selector de dificultad;
-- pistas automáticas;
+- pistas automáticas o detección de técnicas sobre la partida actual;
 - cronómetro competitivo;
 - estadísticas persistentes entre partidas;
 - historial de partidas;
