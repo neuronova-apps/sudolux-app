@@ -194,9 +194,20 @@ function validSolvedGrid(solution) {
   return true;
 }
 
+function normalizeNotes(rawNotes, puzzle, values) {
+  if (!Array.isArray(rawNotes) || rawNotes.length !== 81) {
+    return Array.from({length: 81}, () => []);
+  }
+
+  return rawNotes.map((entry, index) => {
+    if (puzzle[index] !== 0 || values[index] !== 0 || !Array.isArray(entry)) return [];
+    return [...new Set(entry.filter(number => Number.isInteger(number) && number >= 1 && number <= 9))].sort((a, b) => a - b);
+  });
+}
+
 function normalizeStoredGame(value) {
   if (!value || typeof value !== 'object') return null;
-  const {puzzle, solution, values, errorCells, selectedIndex} = value;
+  const {puzzle, solution, values, errorCells, selectedIndex, notes, noteMode} = value;
   if (!validBoardArray(puzzle) || !validSolvedGrid(solution) || !validBoardArray(values)) return null;
 
   const cluesAreValid = puzzle.every((number, index) => number === 0 || (number === solution[index] && values[index] === number));
@@ -213,8 +224,10 @@ function normalizeStoredGame(value) {
     puzzle: [...puzzle],
     solution: [...solution],
     values: [...values],
+    notes: normalizeNotes(notes, puzzle, values),
     errorCells: normalizedErrors,
-    selectedIndex: normalizedSelection
+    selectedIndex: normalizedSelection,
+    noteMode: noteMode === true
   };
 }
 
@@ -251,6 +264,7 @@ const solution = generatedGame.solution;
 
 const sudokuBoard = document.querySelector('#sudokuBoard');
 const numberPad = document.querySelector('#numberPad');
+const noteModeButton = document.querySelector('#noteModeButton');
 const eraseButton = document.querySelector('#eraseButton');
 const checkButton = document.querySelector('#checkButton');
 const resetButton = document.querySelector('#resetButton');
@@ -264,8 +278,10 @@ if (errorLabel) errorLabel.textContent = 'Casillas falladas';
 if (gameStats) gameStats.setAttribute('aria-label', 'Estado de la partida: progreso y casillas falladas');
 
 let values = restoredGame ? [...restoredGame.values] : [...puzzle];
+let notes = (restoredGame?.notes || Array.from({length: 81}, () => [])).map(entry => new Set(entry));
 let selectedIndex = restoredGame?.selectedIndex ?? puzzle.findIndex(value => value === 0);
 let errorCells = new Set(restoredGame?.errorCells || []);
+let noteMode = restoredGame?.noteMode === true;
 let cells = [];
 let hasProgress = false;
 let gameCompleted = false;
@@ -280,15 +296,22 @@ function sameBlock(a, b) {
   return Math.floor(ca.row / 3) === Math.floor(cb.row / 3) && Math.floor(ca.column / 3) === Math.floor(cb.column / 3);
 }
 
+function noteList(index) {
+  return [...notes[index]].sort((a, b) => a - b);
+}
+
 function cellLabel(index) {
   const {row, column} = coordinates(index);
   const value = values[index];
   const type = puzzle[index] ? 'pista fija' : 'casilla editable';
-  return `Fila ${row + 1}, columna ${column + 1}, ${value || 'vacía'}, ${type}`;
+  const candidates = !value && notes[index].size ? `, candidatos ${noteList(index).join(', ')}` : '';
+  return `Fila ${row + 1}, columna ${column + 1}, ${value || 'vacía'}${candidates}, ${type}`;
 }
 
 function updateProgressState() {
-  hasProgress = values.some((value, index) => puzzle[index] === 0 && value !== 0);
+  const hasValues = values.some((value, index) => puzzle[index] === 0 && value !== 0);
+  const hasNotes = notes.some((entry, index) => puzzle[index] === 0 && entry.size > 0);
+  hasProgress = hasValues || hasNotes;
 }
 
 function persistGameState() {
@@ -298,13 +321,22 @@ function persistGameState() {
   }
 
   writeStoredGame({
-    version: 1,
+    version: 2,
     puzzle,
     solution,
     values,
+    notes: notes.map(entry => [...entry].sort((a, b) => a - b)),
     errorCells: [...errorCells],
-    selectedIndex
+    selectedIndex,
+    noteMode
   });
+}
+
+function updateNoteModeButton() {
+  if (!noteModeButton) return;
+  noteModeButton.setAttribute('aria-pressed', String(noteMode));
+  noteModeButton.classList.toggle('active', noteMode);
+  noteModeButton.textContent = noteMode ? 'Notas · activadas' : 'Notas · desactivadas';
 }
 
 function updateProgress() {
@@ -321,6 +353,29 @@ function updateProgress() {
   }
 }
 
+function renderCellContent(cell, index) {
+  const value = values[index];
+  cell.replaceChildren();
+
+  if (value) {
+    cell.textContent = String(value);
+    return;
+  }
+
+  const candidates = noteList(index);
+  if (!candidates.length) return;
+
+  const grid = document.createElement('span');
+  grid.className = 'candidate-grid';
+  grid.setAttribute('aria-hidden', 'true');
+  for (let number = 1; number <= 9; number += 1) {
+    const candidate = document.createElement('span');
+    candidate.textContent = notes[index].has(number) ? String(number) : '';
+    grid.appendChild(candidate);
+  }
+  cell.appendChild(grid);
+}
+
 function paintBoard() {
   cells.forEach((cell, index) => {
     const {row, column} = coordinates(index);
@@ -329,17 +384,19 @@ function paintBoard() {
     const same = values[selectedIndex] !== 0 && values[index] === values[selectedIndex];
     const incorrect = puzzle[index] === 0 && values[index] !== 0 && values[index] !== solution[index];
 
-    cell.textContent = values[index] || '';
+    renderCellContent(cell, index);
     cell.classList.toggle('selected', index === selectedIndex);
     cell.classList.toggle('related', index !== selectedIndex && related);
     cell.classList.toggle('same', index !== selectedIndex && same);
     cell.classList.toggle('given', puzzle[index] !== 0);
     cell.classList.toggle('invalid', incorrect);
+    cell.classList.toggle('has-notes', values[index] === 0 && notes[index].size > 0);
     cell.setAttribute('aria-label', cellLabel(index));
     cell.tabIndex = index === selectedIndex ? 0 : -1;
   });
   updateProgressState();
   updateProgress();
+  updateNoteModeButton();
   persistGameState();
 }
 
@@ -350,13 +407,44 @@ function selectCell(index, focus = false) {
   if (focus) cells[index]?.focus();
   if (gameStatus) {
     const {row, column} = coordinates(index);
+    const candidates = noteList(index);
     gameStatus.textContent = puzzle[index]
       ? `Fila ${row + 1}, columna ${column + 1}: número fijo ${puzzle[index]}.`
-      : `Fila ${row + 1}, columna ${column + 1}: casilla editable.`;
+      : candidates.length
+        ? `Fila ${row + 1}, columna ${column + 1}: casilla editable con candidatos ${candidates.join(', ')}.`
+        : `Fila ${row + 1}, columna ${column + 1}: casilla editable.`;
   }
 }
 
+function toggleNote(number) {
+  if (selectedIndex < 0 || puzzle[selectedIndex] !== 0) {
+    if (gameStatus) gameStatus.textContent = 'Selecciona una casilla vacía antes de añadir candidatos.';
+    return;
+  }
+  if (values[selectedIndex] !== 0) {
+    if (gameStatus) gameStatus.textContent = 'Borra primero el valor definitivo de esta casilla para usar candidatos.';
+    return;
+  }
+
+  const candidates = notes[selectedIndex];
+  const removing = candidates.has(number);
+  if (removing) candidates.delete(number);
+  else candidates.add(number);
+
+  if (gameStatus) {
+    gameStatus.textContent = removing
+      ? `Candidato ${number} eliminado de la casilla.`
+      : `Candidato ${number} añadido a la casilla. Las notas no cuentan como respuesta ni como error.`;
+  }
+  paintBoard();
+}
+
 function enterNumber(number) {
+  if (noteMode) {
+    toggleNote(number);
+    return;
+  }
+
   if (selectedIndex < 0 || puzzle[selectedIndex] !== 0) {
     if (gameStatus) gameStatus.textContent = 'Selecciona una casilla vacía antes de ingresar un número.';
     return;
@@ -368,6 +456,7 @@ function enterNumber(number) {
   }
 
   values[selectedIndex] = number;
+  notes[selectedIndex].clear();
 
   if (number !== solution[selectedIndex]) {
     const newFailedCell = !errorCells.has(selectedIndex);
@@ -385,9 +474,18 @@ function enterNumber(number) {
 }
 
 function eraseSelected() {
-  if (selectedIndex < 0 || puzzle[selectedIndex] !== 0 || values[selectedIndex] === 0) return;
+  if (selectedIndex < 0 || puzzle[selectedIndex] !== 0) return;
+  const hadValue = values[selectedIndex] !== 0;
+  const hadNotes = notes[selectedIndex].size > 0;
+  if (!hadValue && !hadNotes) return;
+
   values[selectedIndex] = 0;
-  if (gameStatus) gameStatus.textContent = 'Casilla borrada. El historial de casillas falladas no cambia.';
+  notes[selectedIndex].clear();
+  if (gameStatus) {
+    gameStatus.textContent = hadValue
+      ? 'Casilla borrada. El historial de casillas falladas no cambia.'
+      : 'Candidatos borrados de la casilla.';
+  }
   paintBoard();
 }
 
@@ -408,25 +506,27 @@ function checkBoard() {
     clearStoredGame();
     gameStatus.textContent = '¡Tablero completo y correcto! Has terminado la demostración.';
   } else if (incorrect > 0) {
-    gameStatus.textContent = `Hay ${incorrect} ${incorrect === 1 ? 'casilla incorrecta actualmente' : 'casillas incorrectas actualmente'} y ${empty} por completar. Comprobar no modifica el registro de casillas falladas.`;
+    gameStatus.textContent = `Hay ${incorrect} ${incorrect === 1 ? 'casilla incorrecta actualmente' : 'casillas incorrectas actualmente'} y ${empty} por completar. Las notas no se consideran respuestas y Comprobar no modifica el registro de casillas falladas.`;
   } else {
-    gameStatus.textContent = `Todo lo colocado es correcto. Faltan ${empty} ${empty === 1 ? 'casilla' : 'casillas'} por completar. Comprobar no modifica el registro de casillas falladas.`;
+    gameStatus.textContent = `Todo lo colocado es correcto. Faltan ${empty} ${empty === 1 ? 'casilla' : 'casillas'} por completar. Las notas no se consideran respuestas.`;
   }
 }
 
 function resetGame() {
   if (hasProgress && !gameCompleted) {
-    const confirmed = window.confirm('Tienes una partida en progreso. ¿Deseas reiniciar este mismo Sudoku y perder los movimientos realizados?');
+    const confirmed = window.confirm('Tienes una partida en progreso. ¿Deseas reiniciar este mismo Sudoku y perder los movimientos y candidatos guardados?');
     if (!confirmed) return;
   }
 
   values = [...puzzle];
+  notes = Array.from({length: 81}, () => new Set());
   errorCells = new Set();
+  noteMode = false;
   hasProgress = false;
   gameCompleted = false;
   selectedIndex = puzzle.findIndex(value => value === 0);
   paintBoard();
-  if (gameStatus) gameStatus.textContent = 'La partida de demostración se reinició. El tablero actual se mantiene y el registro de casillas falladas volvió a cero.';
+  if (gameStatus) gameStatus.textContent = 'La partida de demostración se reinició. El tablero actual se mantiene; movimientos, candidatos y casillas falladas volvieron a cero.';
 }
 
 function moveSelection(key) {
@@ -440,8 +540,20 @@ function moveSelection(key) {
   selectCell(nextRow * 9 + nextColumn, true);
 }
 
+function toggleNoteMode() {
+  noteMode = !noteMode;
+  updateNoteModeButton();
+  updateProgressState();
+  persistGameState();
+  if (gameStatus) {
+    gameStatus.textContent = noteMode
+      ? 'Modo notas activado. Los números 1–9 añadirán o quitarán candidatos sin validar la solución.'
+      : 'Modo notas desactivado. Los números 1–9 se ingresarán como respuestas definitivas.';
+  }
+}
+
 // La partida en curso se guarda localmente. beforeunload se mantiene como
-// protección adicional ante una salida accidental mientras existen movimientos.
+// protección adicional ante una salida accidental mientras existan valores o notas.
 window.addEventListener('beforeunload', event => {
   if (!hasProgress || gameCompleted) return;
   event.preventDefault();
@@ -461,6 +573,11 @@ if (sudokuBoard) {
         moveSelection(event.key);
         return;
       }
+      if (event.key.toLowerCase() === 'n') {
+        event.preventDefault();
+        toggleNoteMode();
+        return;
+      }
       if (/^[1-9]$/.test(event.key)) {
         event.preventDefault();
         enterNumber(Number(event.key));
@@ -475,13 +592,17 @@ if (sudokuBoard) {
   });
   paintBoard();
   if (restoredGame && gameStatus) {
-    gameStatus.textContent = 'Partida guardada restaurada. Puedes continuar desde donde la dejaste.';
+    const restoredNotes = notes.reduce((total, entry) => total + entry.size, 0);
+    gameStatus.textContent = restoredNotes
+      ? 'Partida guardada restaurada con sus candidatos. Puedes continuar desde donde la dejaste.'
+      : 'Partida guardada restaurada. Puedes continuar desde donde la dejaste.';
   }
 }
 
 numberPad?.querySelectorAll('[data-number]').forEach(button => {
   button.addEventListener('click', () => enterNumber(Number(button.dataset.number)));
 });
+noteModeButton?.addEventListener('click', toggleNoteMode);
 eraseButton?.addEventListener('click', eraseSelected);
 checkButton?.addEventListener('click', checkBoard);
 resetButton?.addEventListener('click', resetGame);
