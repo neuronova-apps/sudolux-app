@@ -119,7 +119,8 @@ La capa `game-accessibility.js` refuerza específicamente la experiencia del Sud
 - proporciona instrucciones de teclado asociadas al tablero mediante `aria-describedby`;
 - devuelve el foco al botón del menú cuando se cierra con `Escape`;
 - después de usar el panel numérico o borrar, devuelve el foco a la casilla activa;
-- después de comprobar o reiniciar, lleva el foco al mensaje de estado para comunicar el resultado.
+- después de comprobar la partida, lleva el foco al mensaje de estado para comunicar el resultado;
+- al reiniciar, conserva el comportamiento de foco del control para no interferir con una posible cancelación de la confirmación.
 
 Estas mejoras no se presentan como certificación WCAG ni como sustituto de una auditoría formal de accesibilidad.
 
