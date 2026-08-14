@@ -43,8 +43,10 @@ La demo web funcional incorpora:
 - protección ante recarga, cierre o salida accidental cuando existe una partida en progreso;
 - navegación por teclado dentro del tablero;
 - ingreso mediante teclado o panel numérico;
-- validación básica de movimientos;
-- comprobación y reinicio de la partida actual;
+- validación inmediata de movimientos;
+- registro de casillas falladas sin duplicar intentos repetidos sobre la misma posición;
+- comprobación del estado actual del tablero sin alterar ese registro;
+- reinicio de la partida actual;
 - integración con el módulo de accesibilidad compartido de Neuronova Apps.
 
 ## Modo de juego web
@@ -53,7 +55,11 @@ El juego web está limitado intencionalmente a una partida clásica de demostrac
 
 Cada nueva carga genera una variante diferente mediante transformaciones que conservan una estructura de Sudoku válida. Mientras el usuario tenga movimientos realizados y la partida no esté completada, el navegador solicita confirmación antes de recargar, cerrar o abandonar la página para reducir la pérdida accidental del progreso.
 
-El botón **Reiniciar** no genera un Sudoku nuevo: restaura el mismo tablero de la sesión. Si ya existe progreso, solicita confirmación antes de borrar los movimientos realizados.
+La métrica **Casillas falladas** representa cuántas casillas distintas han recibido al menos una respuesta incorrecta durante la partida. Una misma casilla solo cuenta una vez aunque se prueben varios números erróneos. Si después se corrige o se borra, permanece en ese registro histórico hasta reiniciar la demo.
+
+El botón **Comprobar partida** evalúa el estado actual del tablero y resalta las casillas incorrectas que sigan presentes, pero no suma elementos al registro de casillas falladas. De este modo se separan el historial de dificultad de la partida y el estado actual del tablero.
+
+El botón **Reiniciar** no genera un Sudoku nuevo: restaura el mismo tablero de la sesión, borra los movimientos y devuelve el registro de casillas falladas a cero. Si ya existe progreso, solicita confirmación antes de borrar los movimientos realizados.
 
 No incluye por ahora:
 
