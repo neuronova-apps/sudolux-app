@@ -22,12 +22,14 @@ Ya implementado:
 - comprobación separada del estado actual del tablero;
 - guardado local de una partida con progreso;
 - restauración segura del mismo tablero y movimientos después de recargar;
-- fallback en memoria cuando el almacenamiento local no está disponible.
+- fallback en memoria cuando el almacenamiento local no está disponible;
+- notas/candidatos 1–9 por casilla;
+- modo Notas alternable desde botón o teclado;
+- persistencia y restauración de candidatos junto con la partida.
 
 Pendiente:
 
 - mejoras adicionales de selección y estados;
-- notas o candidatos;
 - pistas comprensibles;
 - control de validación configurable.
 
@@ -60,4 +62,4 @@ Pendiente:
 
 ## Prioridad
 
-La estabilidad del generador, la claridad de interacción, las notas/candidatos y la calidad de futuras pistas tienen prioridad sobre aumentar rápidamente la cantidad de modos.
+La estabilidad del generador, la claridad de interacción y la calidad de futuras pistas tienen prioridad sobre aumentar rápidamente la cantidad de modos.
