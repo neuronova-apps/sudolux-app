@@ -190,7 +190,7 @@
             <p class="eyebrow">Demo web funcional</p>
             <h2>Resuelve una partida clásica directamente en Sudolux.</h2>
           </div>
-          <p>La versión actual ofrece un tablero clásico 9 × 9 jugable. Las dificultades, notas, pistas, estadísticas, desafíos y otros modos permanecen como ampliaciones futuras del proyecto.</p>
+          <p>La versión actual ofrece un tablero clásico 9 × 9 jugable. Si haces movimientos, la partida en curso se guarda localmente en este navegador para que puedas continuar después de recargar.</p>
         </div>
 
         <div class="game-shell reveal">
@@ -200,9 +200,9 @@
               <h3>Sudoku clásico</h3>
               <p>Selecciona una casilla vacía y usa los números o el teclado. Puedes verificar la partida cuando quieras.</p>
             </div>
-            <div class="game-stats" aria-label="Estado de la partida">
+            <div class="game-stats" aria-label="Estado de la partida: progreso y casillas falladas">
               <div><span>Completado</span><strong id="progressValue">0%</strong></div>
-              <div><span>Errores</span><strong id="errorValue">0</strong></div>
+              <div><span>Casillas falladas</span><strong id="errorValue">0</strong></div>
             </div>
           </div>
 
@@ -223,8 +223,8 @@
               <button id="checkButton" class="game-button primary-control" type="button">Comprobar partida</button>
               <button id="resetButton" class="game-button" type="button">Reiniciar demo</button>
               <div class="demo-limit">
-                <strong>Alcance actual</strong>
-                <p>Sin pistas automáticas, notas, selector de dificultad, cronómetro competitivo ni estadísticas persistentes.</p>
+                <strong>Guardado local</strong>
+                <p>La partida en curso, los movimientos y las casillas falladas se guardan solo en este navegador. No requiere cuenta ni sincronización externa.</p>
               </div>
             </aside>
           </div>
