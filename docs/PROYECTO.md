@@ -4,13 +4,19 @@
 
 **Sudolux** es una iniciativa personal e independiente de Neuronova Apps orientada a ofrecer una experiencia digital de Sudoku clara, accesible y progresiva.
 
+## Estado actual
+
+**Demo web funcional en desarrollo activo.**
+
+La versión web combina contenido introductorio, demostración de reglas y una partida clásica 9 × 9 jugable. La aplicación móvil permanece como una expansión futura del proyecto.
+
 ## Propósito
 
 El proyecto busca combinar tres componentes:
 
 - comprender qué es el Sudoku y cómo funciona;
 - utilizarlo como entretenimiento lógico y actividad mental estimulante;
-- ofrecer una experiencia de juego simple en la web y una experiencia más completa en la aplicación.
+- ofrecer una experiencia web funcional de aprendizaje y juego, con posibilidad de ampliar el proyecto posteriormente en web y móvil.
 
 ## Enfoque
 
@@ -18,7 +24,7 @@ Sudolux no se presenta como herramienta médica, terapéutica ni preventiva. El 
 
 ## Público de referencia
 
-La propuesta está dirigida a personas interesadas en Sudoku, lógica y entretenimiento activo, desde usuarios principiantes hasta quienes posteriormente quieran acceder a modos más amplios en la aplicación.
+La propuesta está dirigida a personas interesadas en Sudoku, lógica y entretenimiento activo, desde usuarios principiantes hasta quienes posteriormente quieran acceder a funciones y modos más amplios.
 
 ## Principios del proyecto
 
@@ -34,9 +40,9 @@ La versión web prioriza una buena experiencia clásica antes de añadir múltip
 
 El proyecto incorpora el núcleo de accesibilidad compartido de Neuronova Apps y busca mantener navegación por teclado y controles comprensibles.
 
-### Separación web / app
+### Web con valor propio
 
-La web funciona como presentación, aprendizaje y demostración. La aplicación se proyecta como el espacio principal para dificultades, estadísticas, XP, logros y modos adicionales.
+La web no es únicamente una página de exhibición. Actualmente funciona como demo jugable y espacio de aprendizaje. Las funciones futuras podrán incorporarse a la web o a una futura aplicación móvil según su alcance, complejidad y necesidades de persistencia.
 
 ## Ecosistema
 
@@ -48,4 +54,4 @@ Proyecto personal desarrollado por Gabriel Berrospi.
 
 ## Estado
 
-En desarrollo activo.
+**Demo web funcional en desarrollo activo.**
