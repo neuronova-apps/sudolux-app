@@ -4,7 +4,7 @@
 
 **Demo web funcional en desarrollo activo.**
 
-La versión web de Sudolux tiene un propósito introductorio, educativo y jugable. Permite comprender las reglas, aprender técnicas básicas de resolución y completar una partida clásica 9 × 9 de demostración con valores definitivos, candidatos y persistencia local.
+La versión web de Sudolux tiene un propósito introductorio, educativo y jugable. Permite comprender las reglas, aprender técnicas básicas de resolución, consultar cinco guías públicas indexables y completar una partida clásica 9 × 9 de demostración con valores definitivos, candidatos y persistencia local.
 
 ## Alcance de la web
 
@@ -15,6 +15,10 @@ Incluye:
 - reglas de fila, columna y bloque;
 - demostración visual de las reglas;
 - guía introductoria de resolución mediante restricciones, candidatos, descarte y único posible;
+- cinco páginas educativas indexables: cómo jugar, reglas, principiantes, técnicas básicas y actividad mental;
+- enlaces internos entre las guías y la demo;
+- título, descripción, canonical y `index, follow` propios en cada guía;
+- sitemap con portada, cinco guías y privacidad;
 - información sobre razonamiento, atención y actividad mental;
 - una partida clásica de demostración;
 - generación de una variante válida cuando no existe una partida activa guardada;
@@ -31,9 +35,9 @@ Incluye:
 - métrica de casillas falladas por posición única;
 - comprobación del estado actual del tablero sin modificar esa métrica histórica;
 - reinicio del tablero actual;
-- accesibilidad compartida con Neuronova Apps.
+- accesibilidad compartida con Neuronova Apps y semántica específica del grid.
 
-La guía educativa propone la secuencia **observar → anotar → descartar → resolver**. Su objetivo es enseñar conceptos básicos antes o durante la práctica. No analiza automáticamente el tablero actual ni ofrece una pista calculada sobre el siguiente movimiento.
+La guía educativa propone la secuencia **observar → anotar → descartar → resolver**. Su objetivo es enseñar conceptos básicos antes o durante la práctica. Las páginas indexables amplían esos conceptos, pero no analizan automáticamente el tablero actual ni ofrecen una pista calculada sobre el siguiente movimiento.
 
 Los candidatos son ayudas de trabajo de la persona usuaria. No se validan contra la solución, no cuentan como respuestas, no modifican el porcentaje completado y no incrementan **Casillas falladas**.
 
@@ -74,7 +78,7 @@ Estas funciones no deben presentarse como disponibles hasta estar implementadas 
 
 ## Alcance de bienestar cognitivo
 
-Sudolux puede presentar el Sudoku como una actividad mentalmente estimulante y de entretenimiento activo. No debe afirmar que previene enfermedades, evita el deterioro cognitivo o sustituye recomendaciones profesionales de salud.
+Sudolux puede presentar el Sudoku como una actividad mentalmente estimulante y de entretenimiento activo. La guía `sudoku-y-actividad-mental.html` mantiene esa misma limitación: no debe afirmar que el Sudoku previene enfermedades, evita el deterioro cognitivo, actúa como tratamiento o sustituye recomendaciones profesionales de salud.
 
 ## Criterio de crecimiento
 
