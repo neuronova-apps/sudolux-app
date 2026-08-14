@@ -39,8 +39,12 @@ La demo web funcional incorpora:
 - demostración visual interactiva de las tres reglas;
 - información sobre razonamiento, atención y actividad mental;
 - una partida clásica de demostración;
-- generación aleatoria de una variante válida del Sudoku en cada nueva carga de la página;
-- protección ante recarga, cierre o salida accidental cuando existe una partida en progreso;
+- generación aleatoria de una variante válida cuando no existe una partida activa guardada;
+- guardado local de la partida en curso cuando existen movimientos;
+- restauración del mismo tablero, movimientos, casillas falladas y selección después de recargar;
+- validación de los datos guardados antes de restaurarlos;
+- funcionamiento en memoria si `localStorage` no está disponible;
+- protección adicional ante recarga, cierre o salida accidental cuando existe una partida en progreso;
 - navegación por teclado dentro del tablero;
 - ingreso mediante teclado o panel numérico;
 - validación inmediata de movimientos;
@@ -51,15 +55,19 @@ La demo web funcional incorpora:
 
 ## Modo de juego web
 
-El juego web está limitado intencionalmente a una partida clásica de demostración por sesión.
+La web mantiene una partida clásica activa. Cuando se introduce al menos un movimiento, Sudolux guarda localmente en el navegador el tablero generado, su solución, los movimientos realizados, el registro de casillas falladas y la casilla seleccionada. Al recargar, esos datos se validan y, si son coherentes, se restaura la misma partida.
 
-Cada nueva carga genera una variante diferente mediante transformaciones que conservan una estructura de Sudoku válida. Mientras el usuario tenga movimientos realizados y la partida no esté completada, el navegador solicita confirmación antes de recargar, cerrar o abandonar la página para reducir la pérdida accidental del progreso.
+El almacenamiento utiliza la clave `sudolux-demo-v1` y permanece únicamente en el navegador. No requiere cuenta, backend ni sincronización externa. Si `localStorage` no puede utilizarse, la demo continúa funcionando durante la sesión sin persistencia.
+
+Un tablero recién generado y sin movimientos no se conserva de forma permanente. Si la partida se reinicia hasta quedar sin progreso o se completa correctamente, el guardado local se elimina. De este modo, una recarga posterior puede generar otra variante válida.
+
+Mientras exista progreso sin completar, el navegador mantiene además la confirmación `beforeunload` como protección adicional frente a una salida accidental.
 
 La métrica **Casillas falladas** representa cuántas casillas distintas han recibido al menos una respuesta incorrecta durante la partida. Una misma casilla solo cuenta una vez aunque se prueben varios números erróneos. Si después se corrige o se borra, permanece en ese registro histórico hasta reiniciar la demo.
 
 El botón **Comprobar partida** evalúa el estado actual del tablero y resalta las casillas incorrectas que sigan presentes, pero no suma elementos al registro de casillas falladas. De este modo se separan el historial de dificultad de la partida y el estado actual del tablero.
 
-El botón **Reiniciar** no genera un Sudoku nuevo: restaura el mismo tablero de la sesión, borra los movimientos y devuelve el registro de casillas falladas a cero. Si ya existe progreso, solicita confirmación antes de borrar los movimientos realizados.
+El botón **Reiniciar** no genera inmediatamente un Sudoku nuevo: restaura el mismo tablero, borra los movimientos, devuelve el registro de casillas falladas a cero y elimina la partida persistida al quedar sin progreso. Si ya existe progreso, solicita confirmación antes de borrar los movimientos realizados.
 
 No incluye por ahora:
 
@@ -67,7 +75,7 @@ No incluye por ahora:
 - notas o candidatos;
 - pistas automáticas;
 - cronómetro competitivo;
-- estadísticas persistentes;
+- estadísticas persistentes entre partidas;
 - desafíos diarios;
 - ranking;
 - logros;
@@ -89,7 +97,7 @@ La aplicación móvil se mantiene como una expansión futura de Sudolux y podrá
 - notas y candidatos;
 - ayudas y pistas;
 - estadísticas de juego;
-- partidas guardadas;
+- gestión de múltiples partidas y sincronización;
 - desafíos diarios;
 - sistema de XP y logros;
 - ranking;
@@ -100,7 +108,7 @@ Estas funciones no se consideran disponibles hasta estar implementadas y verific
 
 ## Desarrollo
 
-Sudolux se encuentra en desarrollo activo. La web es actualmente una **demo web funcional** que combina presentación, contenido informativo y una partida clásica jugable. La aplicación móvil continúa en la hoja de ruta como expansión futura, no como requisito para que la versión web tenga valor propio.
+Sudolux se encuentra en desarrollo activo. La web es actualmente una **demo web funcional** que combina presentación, contenido informativo y una partida clásica jugable con persistencia local de la partida en curso. La aplicación móvil continúa en la hoja de ruta como expansión futura, no como requisito para que la versión web tenga valor propio.
 
 ## Ecosistema
 
