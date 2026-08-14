@@ -65,7 +65,8 @@ La demo web funcional incorpora:
 - registro de casillas falladas sin duplicar intentos repetidos sobre la misma posición;
 - comprobación del estado actual del tablero sin alterar ese registro;
 - reinicio de la partida actual;
-- integración con el módulo de accesibilidad compartido de Neuronova Apps.
+- integración con el módulo de accesibilidad compartido de Neuronova Apps;
+- capa específica de accesibilidad para el tablero y el flujo de foco.
 
 ## Modo de juego web
 
@@ -110,13 +111,27 @@ Sudolux utiliza el núcleo central de accesibilidad de Neuronova Apps. Entre sus
 
 El tablero de demostración contempla navegación mediante teclas de dirección, ingreso con teclas numéricas, alternancia del modo Notas con `N` y borrado mediante `Backspace` o `Delete`. Las etiquetas accesibles de cada casilla incluyen sus candidatos cuando existen.
 
-## Arquitectura visual
+La capa `game-accessibility.js` refuerza específicamente la experiencia del Sudoku:
+
+- declara el grid como una estructura de 9 filas y 9 columnas;
+- expone `aria-rowindex` y `aria-colindex` en cada casilla;
+- sincroniza `aria-selected`, `aria-readonly` y `aria-invalid` con el estado visual;
+- proporciona instrucciones de teclado asociadas al tablero mediante `aria-describedby`;
+- devuelve el foco al botón del menú cuando se cierra con `Escape`;
+- después de usar el panel numérico o borrar, devuelve el foco a la casilla activa;
+- después de comprobar o reiniciar, lleva el foco al mensaje de estado para comunicar el resultado.
+
+Estas mejoras no se presentan como certificación WCAG ni como sustituto de una auditoría formal de accesibilidad.
+
+## Arquitectura visual y de interacción
 
 - `styles.css`: estilos globales, tablero y componentes principales;
 - `techniques.css`: estilos exclusivos de la sección educativa de técnicas;
-- `hero-orbit.css`: presentación orbital del hero.
+- `hero-orbit.css`: presentación orbital del hero;
+- `script.js`: lógica de juego, candidatos y persistencia;
+- `game-accessibility.js`: semántica ARIA y gestión complementaria del foco del tablero.
 
-La separación evita mezclar la presentación del aprendizaje guiado con los estilos del tablero interactivo.
+La separación evita mezclar el estado del juego con la capa específica de accesibilidad y facilita revisar cada responsabilidad de manera independiente.
 
 ## Alcance de la aplicación
 
