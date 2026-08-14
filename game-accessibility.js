@@ -5,7 +5,6 @@
   const numberPad = document.querySelector('#numberPad');
   const eraseButton = document.querySelector('#eraseButton');
   const checkButton = document.querySelector('#checkButton');
-  const resetButton = document.querySelector('#resetButton');
   const gameStatus = document.querySelector('#gameStatus');
 
   function createInstructions() {
@@ -72,7 +71,7 @@
   document.addEventListener('keydown', event => {
     if (event.key !== 'Escape' || !menuButton || !mainNav?.classList.contains('open')) return;
     queueMicrotask(() => menuButton.focus({preventScroll: true}));
-  });
+  }, true);
 
   numberPad?.addEventListener('click', event => {
     if (!event.target.closest('[data-number]')) return;
@@ -81,5 +80,4 @@
 
   eraseButton?.addEventListener('click', () => queueMicrotask(focusSelectedCell));
   checkButton?.addEventListener('click', () => queueMicrotask(focusStatus));
-  resetButton?.addEventListener('click', () => queueMicrotask(focusStatus));
 })();
