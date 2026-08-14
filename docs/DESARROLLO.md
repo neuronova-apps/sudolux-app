@@ -4,7 +4,7 @@
 
 **Demo web funcional en desarrollo activo.**
 
-La web ya integra contenido introductorio, reglas interactivas y una partida clásica 9 × 9 jugable. La partida en curso puede persistir localmente en el navegador e incluye valores definitivos y candidatos. La aplicación móvil permanece como una expansión futura y no es requisito para que la versión web tenga valor propio.
+La web ya integra contenido introductorio, reglas interactivas, técnicas básicas de resolución y una partida clásica 9 × 9 jugable. La partida en curso puede persistir localmente en el navegador e incluye valores definitivos y candidatos. La aplicación móvil permanece como una expansión futura y no es requisito para que la versión web tenga valor propio.
 
 ## Enfoque de desarrollo
 
@@ -14,8 +14,9 @@ Sudolux se desarrolla de forma progresiva, priorizando una base clásica de Sudo
 
 La versión web se organiza en archivos con responsabilidades separadas:
 
-- `index.html`: estructura semántica de la portada, contenido informativo, hero orbital y controles de la demo jugable;
+- `index.html`: estructura semántica de la portada, contenido informativo, técnicas básicas, hero orbital y controles de la demo jugable;
 - `styles.css`: estilos generales, secciones, tablero, candidatos y responsive;
+- `techniques.css`: estilos exclusivos de la sección educativa de técnicas de resolución;
 - `hero-orbit.css`: estilos exclusivos del sistema orbital del hero;
 - `script.js`: navegación, demostración de reglas, lógica del Sudoku, candidatos y persistencia local segura;
 - `privacy/index.html`: política pública de privacidad;
@@ -23,6 +24,19 @@ La versión web se organiza en archivos con responsabilidades separadas:
 - `sitemap.xml`: URLs públicas indexables;
 - `favicon.svg` y `favicon.ico`: identidad gráfica;
 - `.nojekyll`: publicación estática directa mediante GitHub Pages.
+
+## Capa educativa de técnicas
+
+La portada incorpora una secuencia estática y accesible de cuatro pasos:
+
+1. observar las restricciones de fila, columna y bloque;
+2. anotar candidatos;
+3. descartar posibilidades cuando cambia el tablero;
+4. resolver una casilla cuando queda un único candidato posible.
+
+La secuencia se resume como **observar → anotar → descartar → resolver** y enlaza directamente con la demo para practicar usando el modo Notas.
+
+Esta capa no analiza automáticamente el estado del Sudoku ni calcula una pista. La futura funcionalidad de pistas comprensibles deberá ser una capa independiente que explique por qué una técnica aplica sobre la partida actual.
 
 ## Componentes actuales
 
@@ -113,6 +127,8 @@ El tablero procura:
 - mensaje de restauración cuando se recupera una partida local;
 - compatibilidad con ampliación de texto y alto contraste.
 
+La sección educativa utiliza encabezados, artículos y ejemplos textuales; las representaciones visuales de candidatos llevan descripción accesible cuando aportan significado.
+
 ## Pruebas prioritarias
 
 1. validez de las variantes generadas;
@@ -124,7 +140,8 @@ El tablero procura:
 7. funcionamiento cuando `localStorage` no está disponible;
 8. navegación completa con teclado;
 9. funcionamiento en móvil y escritorio;
-10. accesibilidad de candidatos, mensajes y estados.
+10. legibilidad de la sección de técnicas en diferentes tamaños y configuraciones de accesibilidad;
+11. accesibilidad de candidatos, mensajes y estados.
 
 ## Crecimiento
 
