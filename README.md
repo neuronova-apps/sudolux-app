@@ -6,7 +6,7 @@ El proyecto forma parte del ecosistema [Neuronova Apps](https://neuronova-apps.g
 
 ## Propósito
 
-Sudolux busca combinar tres componentes: conocer la lógica del Sudoku, comprender sus reglas y ofrecer una experiencia de juego sencilla. La web funciona actualmente como una **demo web funcional en desarrollo activo**: integra contenido introductorio, reglas interactivas y una partida clásica 9 × 9 jugable. La aplicación móvil permanece como una expansión futura para funciones de mayor amplitud.
+Sudolux busca combinar tres componentes: conocer la lógica del Sudoku, comprender sus reglas y ofrecer una experiencia de juego sencilla. La web funciona actualmente como una **demo web funcional en desarrollo activo**: integra contenido introductorio, reglas interactivas, técnicas básicas de resolución y una partida clásica 9 × 9 jugable. La aplicación móvil permanece como una expansión futura para funciones de mayor amplitud.
 
 ## Qué es el Sudoku
 
@@ -19,6 +19,17 @@ El objetivo consiste en completar las casillas utilizando los números del 1 al 
 - cada bloque de 3 × 3 contenga los números del 1 al 9 sin repetir.
 
 No requiere realizar operaciones matemáticas. Los números funcionan como símbolos y la resolución depende principalmente de la deducción y el descarte de posibilidades.
+
+## Técnicas básicas de resolución
+
+La web incorpora una secuencia introductoria para pasar de las reglas a una decisión concreta:
+
+1. **Observar restricciones:** revisar fila, columna y bloque para detectar números que ya no pueden ocupar una casilla.
+2. **Anotar candidatos:** registrar las posibilidades restantes mediante el modo **Notas**.
+3. **Descartar posibilidades:** actualizar los candidatos cuando aparecen nuevos valores relacionados.
+4. **Buscar un único posible:** colocar un valor definitivo cuando una casilla queda con una sola opción válida.
+
+La secuencia recomendada es **observar → anotar → descartar → resolver**. Estas explicaciones son contenido educativo introductorio; Sudolux todavía no detecta ni propone automáticamente la siguiente técnica o movimiento.
 
 ## Actividad mental
 
@@ -37,6 +48,7 @@ La demo web funcional incorpora:
 - explicación de la estructura del Sudoku clásico;
 - reglas de fila, columna y bloque;
 - demostración visual interactiva de las tres reglas;
+- guía de técnicas básicas: restricciones, candidatos, descarte y único posible;
 - información sobre razonamiento, atención y actividad mental;
 - una partida clásica de demostración;
 - generación aleatoria de una variante válida cuando no existe una partida activa guardada;
@@ -80,7 +92,7 @@ El botón **Reiniciar** no genera inmediatamente un Sudoku nuevo: restaura el mi
 No incluye por ahora:
 
 - selector de dificultad;
-- pistas automáticas;
+- pistas automáticas o detección de técnicas sobre el tablero actual;
 - cronómetro competitivo;
 - estadísticas persistentes entre partidas;
 - historial de partidas;
@@ -97,6 +109,14 @@ Estas funciones permanecen como ampliaciones futuras del proyecto y podrán dist
 Sudolux utiliza el núcleo central de accesibilidad de Neuronova Apps. Entre sus opciones se encuentran tamaño de texto en tres niveles, alto contraste, espaciado de letras y palabras, interlineado amplio, lectura amigable para dislexia, guía de lectura, reducción de movimiento y foco de teclado reforzado.
 
 El tablero de demostración contempla navegación mediante teclas de dirección, ingreso con teclas numéricas, alternancia del modo Notas con `N` y borrado mediante `Backspace` o `Delete`. Las etiquetas accesibles de cada casilla incluyen sus candidatos cuando existen.
+
+## Arquitectura visual
+
+- `styles.css`: estilos globales, tablero y componentes principales;
+- `techniques.css`: estilos exclusivos de la sección educativa de técnicas;
+- `hero-orbit.css`: presentación orbital del hero.
+
+La separación evita mezclar la presentación del aprendizaje guiado con los estilos del tablero interactivo.
 
 ## Alcance de la aplicación
 
@@ -116,7 +136,7 @@ Estas funciones no se consideran disponibles hasta estar implementadas y verific
 
 ## Desarrollo
 
-Sudolux se encuentra en desarrollo activo. La web es actualmente una **demo web funcional** que combina presentación, contenido informativo y una partida clásica jugable con candidatos y persistencia local de la partida en curso. La aplicación móvil continúa en la hoja de ruta como expansión futura, no como requisito para que la versión web tenga valor propio.
+Sudolux se encuentra en desarrollo activo. La web es actualmente una **demo web funcional** que combina aprendizaje introductorio, técnicas básicas, una partida clásica jugable con candidatos y persistencia local de la partida en curso. La aplicación móvil continúa en la hoja de ruta como expansión futura, no como requisito para que la versión web tenga valor propio.
 
 ## Ecosistema
 
