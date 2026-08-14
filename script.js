@@ -292,7 +292,7 @@ function updateProgressState() {
 }
 
 function persistGameState() {
-  if (gameCompleted) {
+  if (gameCompleted || !hasProgress) {
     clearStoredGame();
     return;
   }
