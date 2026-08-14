@@ -41,9 +41,25 @@ La portada enlaza cinco recursos públicos independientes que amplían el conten
 - `tecnicas-basicas-sudoku.html`: restricciones, candidatos, descarte y único posible con mayor detalle;
 - `sudoku-y-actividad-mental.html`: atención, razonamiento y límites de las afirmaciones sobre efectos cognitivos.
 
-Cada página tiene título, descripción, canonical, `index, follow`, metadatos Open Graph/Twitter básicos, navegación interna, accesibilidad compartida y enlaces de vuelta a la demo. El sitemap incluye portada, las cinco guías y privacidad.
+Cada página tiene título, descripción, canonical, `index, follow`, metadatos Open Graph/Twitter, navegación interna, accesibilidad compartida y enlaces de vuelta a la demo. El sitemap incluye portada, las cinco guías y privacidad.
 
 Estas guías son contenido educativo estático. No analizan automáticamente la partida actual ni sustituyen futuras pistas explicadas sobre el tablero.
+
+## Imagen social y metadatos de compartición
+
+Sudolux utiliza una tarjeta social propia en `assets/social/sudolux-social.png`, preparada a **1200 × 630 px** para compartir la portada y las cinco guías educativas.
+
+La portada y las guías utilizan:
+
+- `og:image` apuntando al PNG dedicado;
+- `og:image:type="image/png"`;
+- `og:image:width="1200"` y `og:image:height="630"`;
+- texto alternativo común para la imagen social;
+- `twitter:card="summary_large_image"`;
+- la misma imagen en `twitter:image`;
+- títulos y descripciones sociales específicos de cada página.
+
+El favicon SVG se conserva únicamente como icono del sitio y ya no se utiliza como imagen social en la portada ni en las guías educativas.
 
 ## Actividad mental
 
@@ -64,6 +80,7 @@ La demo web funcional incorpora:
 - demostración visual interactiva de las tres reglas;
 - guía de técnicas básicas: restricciones, candidatos, descarte y único posible;
 - cinco páginas educativas indexables enlazadas desde la portada;
+- tarjeta social dedicada 1200 × 630 para portada y guías;
 - información sobre razonamiento, atención y actividad mental;
 - una partida clásica de demostración;
 - generación aleatoria de una variante válida cuando no existe una partida activa guardada;
@@ -147,6 +164,7 @@ Estas mejoras no se presentan como certificación WCAG ni como sustituto de una 
 - `techniques.css`: estilos exclusivos de la sección educativa de técnicas;
 - `guide-cards.css`: tarjetas de acceso a las guías desde la portada;
 - `resources.css`: presentación compartida por las cinco páginas educativas;
+- `assets/social/sudolux-social.png`: tarjeta social 1200 × 630 para Open Graph y Twitter;
 - `hero-orbit.css`: presentación orbital del hero;
 - `script.js`: lógica de juego, candidatos y persistencia;
 - `game-accessibility.js`: semántica ARIA y gestión complementaria del foco del tablero;
