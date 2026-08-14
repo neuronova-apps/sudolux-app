@@ -20,8 +20,13 @@ Incluye:
 - protección ante salida o recarga cuando existe progreso;
 - navegación mediante teclado;
 - panel numérico;
-- comprobación y reinicio del tablero actual;
+- validación inmediata de cada número ingresado;
+- métrica de casillas falladas por posición única;
+- comprobación del estado actual del tablero sin modificar esa métrica histórica;
+- reinicio del tablero actual;
 - accesibilidad compartida con Neuronova Apps.
+
+La métrica **Casillas falladas** cuenta cada posición una sola vez aunque se introduzcan varios números incorrectos en ella. Corregir o borrar la respuesta no elimina ese registro durante la partida. **Comprobar partida** muestra cuántas respuestas incorrectas siguen presentes en ese momento, pero no añade errores al historial.
 
 ## Límites actuales de la web
 
