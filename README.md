@@ -6,7 +6,7 @@ El proyecto forma parte del ecosistema [Neuronova Apps](https://neuronova-apps.g
 
 ## Propósito
 
-Sudolux busca combinar tres componentes: conocer la lógica del Sudoku, comprender sus reglas y ofrecer una experiencia de juego sencilla. La versión web tiene un alcance introductorio y de demostración; la mayor parte de los modos y funciones de juego se concentrarán en la aplicación.
+Sudolux busca combinar tres componentes: conocer la lógica del Sudoku, comprender sus reglas y ofrecer una experiencia de juego sencilla. La web funciona actualmente como una **demo web funcional en desarrollo activo**: integra contenido introductorio, reglas interactivas y una partida clásica 9 × 9 jugable. La aplicación móvil permanece como una expansión futura para funciones de mayor amplitud.
 
 ## Qué es el Sudoku
 
@@ -32,7 +32,7 @@ Sudolux presenta el Sudoku como entretenimiento y estimulación mental, no como 
 
 ## Componentes de la web
 
-La versión web inicial incorpora:
+La demo web funcional incorpora:
 
 - explicación de la estructura del Sudoku clásico;
 - reglas de fila, columna y bloque;
@@ -67,7 +67,7 @@ No incluye por ahora:
 - logros;
 - distintos modos de juego.
 
-Estas funciones están pensadas principalmente para la aplicación completa.
+Estas funciones permanecen como ampliaciones futuras del proyecto y podrán distribuirse entre la web y una futura aplicación móvil según su alcance técnico y de producto.
 
 ## Accesibilidad
 
@@ -77,7 +77,7 @@ El tablero de demostración también contempla navegación mediante teclas de di
 
 ## Alcance de la aplicación
 
-La aplicación móvil será el espacio principal de crecimiento de Sudolux y podrá incorporar progresivamente:
+La aplicación móvil se mantiene como una expansión futura de Sudolux y podrá incorporar progresivamente funciones que requieran una experiencia más amplia o persistente, como:
 
 - dificultades configurables;
 - notas y candidatos;
@@ -90,9 +90,11 @@ La aplicación móvil será el espacio principal de crecimiento de Sudolux y pod
 - diferentes modos de juego;
 - opciones adicionales de personalización.
 
+Estas funciones no se consideran disponibles hasta estar implementadas y verificadas.
+
 ## Desarrollo
 
-Sudolux se encuentra en desarrollo activo. La web actúa como presentación, espacio informativo y demostración funcional del proyecto, mientras que la aplicación se proyecta como la experiencia principal de juego.
+Sudolux se encuentra en desarrollo activo. La web es actualmente una **demo web funcional** que combina presentación, contenido informativo y una partida clásica jugable. La aplicación móvil continúa en la hoja de ruta como expansión futura, no como requisito para que la versión web tenga valor propio.
 
 ## Ecosistema
 
@@ -104,4 +106,4 @@ Proyecto personal desarrollado por Gabriel Berrospi.
 
 ## Estado
 
-En desarrollo.
+**Demo web funcional en desarrollo activo.**
