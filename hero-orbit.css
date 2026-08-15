@@ -117,50 +117,53 @@
   animation: sudoInnerCounterFree 43s linear infinite;
 }
 
+/* Núcleo Sudolux: mismo lenguaje visual del núcleo principal con favicon oficial */
 .s-core {
-  width: 148px;
-  height: 170px;
+  width: 107px;
+  height: 107px;
   position: relative;
   z-index: 3;
   display: grid;
   place-items: center;
-  align-content: center;
-  gap: 11px;
-  padding: 18px;
-  border: 1px solid rgba(108,231,176,.27);
-  border-radius: 32px;
-  background: linear-gradient(145deg,rgba(13,31,47,.97),rgba(7,20,33,.98));
-  box-shadow: 0 0 64px rgba(108,231,176,.10),inset 0 0 34px rgba(104,217,255,.04);
-}
-
-.s-core-grid {
-  width: 104px;
-  height: 104px;
-  display: grid;
-  grid-template-columns: repeat(3,1fr);
-  border: 1px solid rgba(108,231,176,.35);
-  border-radius: 14px;
+  padding: 0;
+  border: 1px solid rgba(108,231,176,.34);
+  border-radius: 28px;
+  background:
+    url('favicon.svg') center 42% / 72px 72px no-repeat,
+    linear-gradient(145deg,rgba(13,31,47,.97),rgba(7,20,33,.98));
+  box-shadow:
+    0 18px 44px rgba(0,0,0,.30),
+    0 0 34px rgba(108,231,176,.11),
+    inset 0 0 24px rgba(104,217,255,.045);
+  transform: rotate(-2deg);
   overflow: hidden;
 }
 
-.s-core-grid span {
-  display: grid;
-  place-items: center;
-  border-right: 1px solid rgba(255,255,255,.09);
-  border-bottom: 1px solid rgba(255,255,255,.09);
-  color: #d6eee6;
-  font-size: .78rem;
-  font-weight: 900;
+.s-core::before {
+  content: "";
+  position: absolute;
+  inset: 7px;
+  border: 1px solid rgba(104,217,255,.18);
+  border-radius: 22px;
+  pointer-events: none;
 }
 
-.s-core-grid span:nth-child(3n) { border-right: 0; }
-.s-core-grid span:nth-child(n+7) { border-bottom: 0; }
-
-.s-core small {
+.s-core::after {
+  content: "SUDOLUX";
+  position: absolute;
+  left: 50%;
+  bottom: 10px;
+  transform: translateX(-50%);
   color: #8298aa;
-  font-size: .58rem;
+  font-size: .43rem;
   font-weight: 850;
-  letter-spacing: .12em;
+  letter-spacing: .10em;
+  line-height: 1;
+}
+
+.s-core-grid,
+.s-core > small {
+  display: none !important;
 }
 
 @keyframes sudoOuter {
@@ -208,8 +211,14 @@
   .hero-visual { width: min(92vw,390px); }
   .s-orbit-outer { width: 330px; height: 330px; margin: -165px 0 0 -165px; }
   .s-orbit-inner { width: 220px; height: 220px; margin: -110px 0 0 -110px; }
-  .s-core { width: 132px; height: 151px; border-radius: 28px; }
-  .s-core-grid { width: 90px; height: 90px; }
+  .s-core {
+    width: 96px;
+    height: 96px;
+    border-radius: 25px;
+    background-size: 64px 64px,100% 100%;
+  }
+  .s-core::before { border-radius: 19px; }
+  .s-core::after { bottom: 9px; font-size: .39rem; }
   .s-node { min-width: 58px; height: 40px; font-size: .60rem; }
   .s-chip { font-size: .54rem; }
   .s-node-left { left: -39px; }
