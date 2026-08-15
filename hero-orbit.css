@@ -266,3 +266,21 @@
     animation: none !important;
   }
 }
+
+/* Identidad Sudolux en header y footer: reutiliza el favicon del repositorio */
+.site-header .brand-grid,
+.site-footer .brand-grid {
+  width: 39px;
+  height: 39px;
+  flex: 0 0 39px;
+  border: 0;
+  border-radius: 12px;
+  background: url('favicon.svg') center / contain no-repeat;
+  overflow: hidden;
+  box-shadow: 0 8px 24px rgba(0,0,0,.18);
+}
+
+.site-header .brand-grid i,
+.site-footer .brand-grid i {
+  display: none !important;
+}
