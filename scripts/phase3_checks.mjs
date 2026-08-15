@@ -22,7 +22,7 @@ async function runAxe(label, viewport, setup) {
   try {
     const response = await page.goto(baseURL, { waitUntil:'domcontentloaded', timeout:30_000 });
     assert(response && response.status() < 400, `${label}: la página no cargó correctamente.`);
-    await page.locator('#sudokuBoard [role="gridcell"]').first().waitFor({state:'attached',timeout:10_000});
+    await page.locator('#sudokuBoard .sudoku-cell').first().waitFor({state:'attached',timeout:10_000});
     await page.waitForTimeout(250);
     if (setup) await setup(page);
     const results = await new AxeBuilder({ page }).analyze();
@@ -47,14 +47,14 @@ async function runFunctionalFlow() {
   const page = await context.newPage();
   try {
     await page.goto(baseURL, { waitUntil:'domcontentloaded', timeout:30_000 });
-    await page.locator('#sudokuBoard [role="gridcell"]').first().waitFor({state:'attached',timeout:10_000});
+    await page.locator('#sudokuBoard .sudoku-cell').first().waitFor({state:'attached',timeout:10_000});
 
     const columnRule = page.locator('.rule-button[data-rule="column"]');
     await columnRule.click();
     assert(await columnRule.getAttribute('aria-pressed') === 'true', 'Cambiar a la regla Columna no actualizó aria-pressed.');
     assert(((await page.locator('#ruleText').textContent()) || '').toLowerCase().includes('columna'), 'La explicación de la regla no cambió a Columna.');
 
-    const editable = page.locator('#sudokuBoard [role="gridcell"]:not(.given)').first();
+    const editable = page.locator('#sudokuBoard .sudoku-cell:not(.given)').first();
     await editable.click();
     const notes = page.locator('#notesButton');
     await notes.click();
