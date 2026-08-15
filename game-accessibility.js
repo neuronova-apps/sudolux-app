@@ -57,7 +57,7 @@
 
   function normalizeFooterContact() {
     const columns = [...document.querySelectorAll('.site-footer .footer-column')];
-    const contactColumn = columns.find(column => column.querySelector('h2')?.textContent.trim() === 'Proyecto');
+    const contactColumn = columns[1];
     if (!contactColumn) return;
 
     contactColumn.replaceChildren();
@@ -78,9 +78,18 @@
     contactColumn.append(heading, email, location, project);
   }
 
+  function normalizeFooterBottom() {
+    const footerBottom = document.querySelector('.site-footer .footer-bottom');
+    if (!footerBottom) return;
+    footerBottom.innerHTML = `
+      <p>© 2026 Sudolux · Neuronova Apps</p>
+      <p><a href="privacy/">Política de privacidad</a></p>`;
+  }
+
   createInstructions();
   syncGridAccessibility();
   normalizeFooterContact();
+  normalizeFooterBottom();
 
   if (board && 'MutationObserver' in window) {
     const observer = new MutationObserver(syncGridAccessibility);
