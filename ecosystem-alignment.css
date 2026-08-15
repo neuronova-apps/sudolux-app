@@ -195,6 +195,7 @@
 .site-header .menu-button:not(:has(span))::before{content:"☰";font-size:1.15rem;line-height:1}
 @media(max-width:900px){
   .site-header .main-nav{display:none}
+  .site-header .matrix-link{display:none}
   .site-header .menu-button,.site-header .menu{display:block}
   .site-header .main-nav.open{display:flex;position:absolute;top:62px;left:14px;right:14px;flex-direction:column;align-items:stretch;padding:10px;border:1px solid var(--line);border-radius:14px;background:var(--ecosystem-menu-bg);z-index:120}
   .site-header .main-nav.open a,.site-header .main-nav.open button{width:100%;justify-content:flex-start;min-height:42px}
