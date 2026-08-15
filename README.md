@@ -1,205 +1,96 @@
 # Sudolux
 
-Sudolux es una iniciativa personal orientada al desarrollo de una experiencia digital de Sudoku clara, accesible y progresiva.
+Sudolux es una aplicación de Neuronova Apps orientada a aprender las reglas del Sudoku, practicar técnicas básicas y resolver una partida clásica 9 × 9 mediante una experiencia web clara y accesible.
 
-El proyecto forma parte del ecosistema [Neuronova Apps](https://neuronova-apps.github.io/) y se desarrolla de manera independiente por Gabriel Berrospi.
+## Estado del proyecto
 
-## Propósito
+- **Web:** demo funcional en desarrollo activo.
+- **Publicación:** disponible mediante GitHub Pages.
+- **Android:** existe una rama `android` separada para el desarrollo móvil. Se considera trabajo en progreso y no una versión estable o publicada.
 
-Sudolux busca combinar tres componentes: conocer la lógica del Sudoku, comprender sus reglas y ofrecer una experiencia de juego sencilla. La web funciona actualmente como una **demo web funcional en desarrollo activo**: integra contenido introductorio, reglas interactivas, técnicas básicas de resolución, cinco guías educativas públicas y una partida clásica 9 × 9 jugable. La aplicación móvil permanece como una expansión futura para funciones de mayor amplitud.
+## Funciones disponibles
 
-## Qué es el Sudoku
-
-El Sudoku clásico es un rompecabezas lógico formado por una cuadrícula de 9 × 9, dividida en nueve bloques de 3 × 3.
-
-El objetivo consiste en completar las casillas utilizando los números del 1 al 9 de manera que:
-
-- cada fila contenga los números del 1 al 9 sin repetir;
-- cada columna contenga los números del 1 al 9 sin repetir;
-- cada bloque de 3 × 3 contenga los números del 1 al 9 sin repetir.
-
-No requiere realizar operaciones matemáticas. Los números funcionan como símbolos y la resolución depende principalmente de la deducción y el descarte de posibilidades.
-
-## Técnicas básicas de resolución
-
-La web incorpora una secuencia introductoria para pasar de las reglas a una decisión concreta:
-
-1. **Observar restricciones:** revisar fila, columna y bloque para detectar números que ya no pueden ocupar una casilla.
-2. **Anotar candidatos:** registrar las posibilidades restantes mediante el modo **Notas**.
-3. **Descartar posibilidades:** actualizar los candidatos cuando aparecen nuevos valores relacionados.
-4. **Buscar un único posible:** colocar un valor definitivo cuando una casilla queda con una sola opción válida.
-
-La secuencia recomendada es **observar → anotar → descartar → resolver**. Estas explicaciones son contenido educativo introductorio; Sudolux todavía no detecta ni propone automáticamente la siguiente técnica o movimiento.
-
-## Guías educativas indexables
-
-La portada enlaza cinco recursos públicos independientes que amplían el contenido educativo y conducen de nuevo a la práctica:
-
-- `como-jugar-sudoku.html`: objetivo, primeros pasos, candidatos y uso de la demo;
-- `reglas-sudoku.html`: fila, columna y bloque explicados como restricciones simultáneas;
-- `sudoku-para-principiantes.html`: rutina inicial, uso de notas y único posible;
-- `tecnicas-basicas-sudoku.html`: restricciones, candidatos, descarte y único posible con mayor detalle;
-- `sudoku-y-actividad-mental.html`: atención, razonamiento y límites de las afirmaciones sobre efectos cognitivos.
-
-Cada página tiene título, descripción, canonical, `index, follow`, metadatos Open Graph/Twitter, navegación interna, accesibilidad compartida y enlaces de vuelta a la demo. El sitemap incluye portada, las cinco guías y privacidad.
-
-Estas guías son contenido educativo estático. No analizan automáticamente la partida actual ni sustituyen futuras pistas explicadas sobre el tablero.
-
-## Imagen social y metadatos de compartición
-
-Sudolux utiliza una tarjeta social propia en `assets/social/sudolux-social.png`, preparada a **1200 × 630 px** para compartir la portada y las cinco guías educativas.
-
-La portada y las guías utilizan:
-
-- `og:image` apuntando al PNG dedicado;
-- `og:image:type="image/png"`;
-- `og:image:width="1200"` y `og:image:height="630"`;
-- texto alternativo común para la imagen social;
-- `twitter:card="summary_large_image"`;
-- la misma imagen en `twitter:image`;
-- títulos y descripciones sociales específicos de cada página.
-
-El favicon SVG se conserva únicamente como icono del sitio y ya no se utiliza como imagen social en la portada ni en las guías educativas.
-
-## Actividad mental
-
-Resolver Sudoku implica sostener la atención, comparar alternativas, recordar información temporalmente y aplicar reglas de manera ordenada. Por ello puede formar parte de una rutina de actividades mentalmente estimulantes y de entretenimiento activo.
-
-Existe investigación observacional que ha encontrado asociaciones entre una mayor frecuencia de uso de rompecabezas numéricos y un mejor rendimiento en distintas medidas cognitivas en adultos mayores. Sin embargo, estas asociaciones no demuestran que el Sudoku, por sí solo, prevenga el deterioro cognitivo o enfermedades como la demencia.
-
-El National Institute on Aging señala que mantenerse mentalmente activo y participar en actividades significativas puede ser beneficioso, pero también advierte que la evidencia sobre beneficios cognitivos duraderos de juegos o aplicaciones concretas no es definitiva.
-
-Sudolux presenta el Sudoku como entretenimiento y estimulación mental, no como tratamiento, terapia ni método de prevención.
-
-## Componentes de la web
-
-La demo web funcional incorpora:
-
-- explicación de la estructura del Sudoku clásico;
+- explicación de la estructura 9 × 9 y bloques 3 × 3;
 - reglas de fila, columna y bloque;
-- demostración visual interactiva de las tres reglas;
-- guía de técnicas básicas: restricciones, candidatos, descarte y único posible;
-- cinco páginas educativas indexables enlazadas desde la portada;
-- tarjeta social dedicada 1200 × 630 para portada y guías;
-- información sobre razonamiento, atención y actividad mental;
-- una partida clásica de demostración;
-- generación aleatoria de una variante válida cuando no existe una partida activa guardada;
-- guardado local de la partida en curso cuando existen valores o candidatos;
-- restauración del mismo tablero, movimientos, candidatos, casillas falladas, selección y modo de entrada después de recargar;
-- validación de los datos guardados antes de restaurarlos;
-- funcionamiento en memoria si `localStorage` no está disponible;
-- protección adicional ante recarga, cierre o salida accidental cuando existe una partida en progreso;
-- navegación por teclado dentro del tablero;
-- ingreso mediante teclado o panel numérico;
-- modo **Notas** para añadir o quitar candidatos del 1 al 9;
-- tecla `N` para alternar entre valor definitivo y candidatos;
-- validación inmediata únicamente de respuestas definitivas;
-- registro de casillas falladas sin duplicar intentos repetidos sobre la misma posición;
-- comprobación del estado actual del tablero sin alterar ese registro;
-- reinicio de la partida actual;
-- integración con el módulo de accesibilidad compartido de Neuronova Apps;
-- capa específica de accesibilidad para el tablero y el flujo de foco.
+- técnicas básicas de restricciones, candidatos, descarte y único posible;
+- cinco guías educativas públicas e indexables;
+- partida clásica jugable;
+- generación de una variante válida cuando no existe una partida activa;
+- entrada mediante teclado o panel numérico;
+- modo **Notas** para candidatos;
+- validación de respuestas definitivas;
+- persistencia local y restauración de la partida en curso;
+- protección frente a salida accidental cuando existe progreso;
+- navegación por teclado y capa ARIA específica para el tablero;
+- diseño responsive e integración con la accesibilidad compartida de Neuronova Apps.
 
-## Modo de juego web
+Sudolux se presenta como entretenimiento y actividad mental. No constituye tratamiento, terapia ni método de prevención de deterioro cognitivo.
 
-La web mantiene una partida clásica activa. El modo normal introduce respuestas definitivas y el modo **Notas** permite registrar candidatos en casillas editables vacías. Cada candidato funciona como interruptor: pulsar un número lo añade y pulsarlo nuevamente lo elimina.
+## Tecnología
 
-Las notas no se comparan con la solución, no aumentan **Casillas falladas** y no cuentan para el porcentaje completado. Al colocar un valor definitivo en una casilla, sus candidatos se eliminan. **Borrar casilla** elimina el contenido de la posición seleccionada, sea un valor o un conjunto de candidatos.
+La versión web utiliza:
 
-El modo Notas puede alternarse con el botón correspondiente o con la tecla `N`. Las teclas 1–9 y el panel numérico respetan el modo activo.
+- HTML5;
+- CSS3;
+- JavaScript en el navegador;
+- `localStorage` para la partida en curso;
+- GitHub Pages;
+- recursos educativos HTML estáticos;
+- módulo central de accesibilidad de Neuronova Apps más una capa específica para el tablero.
 
-Cuando existe al menos un valor o candidato, Sudolux guarda localmente en el navegador el tablero generado, su solución, los valores, candidatos, registro de casillas falladas, casilla seleccionada y modo de entrada. Al recargar, esos datos se validan y, si son coherentes, se restaura la misma partida.
-
-El almacenamiento utiliza la clave `sudolux-demo-v1` y permanece únicamente en el navegador. La estructura persistida está versionada internamente y mantiene compatibilidad con partidas guardadas antes de incorporar candidatos. No requiere cuenta, backend ni sincronización externa. Si `localStorage` no puede utilizarse, la demo continúa funcionando durante la sesión sin persistencia.
-
-Un tablero recién generado y sin valores ni candidatos no se conserva de forma permanente. Si la partida se reinicia hasta quedar sin progreso o se completa correctamente, el guardado local se elimina. De este modo, una recarga posterior puede generar otra variante válida.
-
-Mientras exista progreso sin completar, el navegador mantiene además la confirmación `beforeunload` como protección adicional frente a una salida accidental.
-
-La métrica **Casillas falladas** representa cuántas casillas distintas han recibido al menos una respuesta definitiva incorrecta durante la partida. Una misma casilla solo cuenta una vez aunque se prueben varios números erróneos. Si después se corrige o se borra, permanece en ese registro histórico hasta reiniciar la demo.
-
-El botón **Comprobar partida** evalúa únicamente los valores definitivos del tablero. Las notas se consideran casillas aún por completar y no suman elementos al registro de casillas falladas.
-
-El botón **Reiniciar** no genera inmediatamente un Sudoku nuevo: restaura el mismo tablero, borra valores y candidatos, devuelve el registro de casillas falladas a cero, desactiva el modo Notas y elimina la partida persistida al quedar sin progreso. Si ya existe progreso, solicita confirmación antes de borrar lo realizado.
-
-No incluye por ahora:
-
-- selector de dificultad;
-- pistas automáticas o detección de técnicas sobre el tablero actual;
-- cronómetro competitivo;
-- estadísticas persistentes entre partidas;
-- historial de partidas;
-- sincronización entre dispositivos;
-- desafíos diarios;
-- ranking;
-- logros;
-- distintos modos de juego.
-
-Estas funciones permanecen como ampliaciones futuras del proyecto y podrán distribuirse entre la web y una futura aplicación móvil según su alcance técnico y de producto.
+No requiere un proceso de compilación para la versión web actual.
 
 ## Accesibilidad
 
-Sudolux utiliza el núcleo central de accesibilidad de Neuronova Apps. Entre sus opciones se encuentran tamaño de texto en tres niveles, alto contraste, espaciado de letras y palabras, interlineado amplio, lectura amigable para dislexia, guía de lectura, reducción de movimiento y foco de teclado reforzado.
+El tablero expone estructura de grid, filas y columnas, estados `aria-selected`, `aria-readonly` y `aria-invalid`, instrucciones asociadas y navegación mediante flechas. También se conserva el foco después de usar el panel numérico y se comunica el resultado de las comprobaciones mediante estados accesibles.
 
-El tablero de demostración contempla navegación mediante teclas de dirección, ingreso con teclas numéricas, alternancia del modo Notas con `N` y borrado mediante `Backspace` o `Delete`. Las etiquetas accesibles de cada casilla incluyen sus candidatos cuando existen.
+Estas medidas no equivalen a una certificación WCAG y continúan sujetas a revisión manual con tecnologías de asistencia.
 
-La capa `game-accessibility.js` refuerza específicamente la experiencia del Sudoku:
+## Privacidad
 
-- declara el grid como una estructura de 9 filas y 9 columnas;
-- expone `aria-rowindex` y `aria-colindex` en cada casilla;
-- sincroniza `aria-selected`, `aria-readonly` y `aria-invalid` con el estado visual;
-- proporciona instrucciones de teclado asociadas al tablero mediante `aria-describedby`;
-- devuelve el foco al botón del menú cuando se cierra con `Escape`;
-- después de usar el panel numérico o borrar, devuelve el foco a la casilla activa;
-- después de comprobar la partida, lleva el foco al mensaje de estado para comunicar el resultado;
-- al reiniciar, conserva el comportamiento de foco del control para no interferir con una posible cancelación de la confirmación.
+La partida y sus candidatos permanecen en el navegador mediante almacenamiento local. La versión actual no requiere cuenta ni sincronización remota.
 
-Las guías educativas emplean encabezados semánticos, navegación identificada, enlaces de salto, foco visible y el módulo de accesibilidad compartido.
+Política pública:
 
-Estas mejoras no se presentan como certificación WCAG ni como sustituto de una auditoría formal de accesibilidad.
+https://neuronova-apps.github.io/sudolux-app/privacy/
 
-## Arquitectura visual y de interacción
+## Desarrollo local
 
-- `styles.css`: estilos globales, tablero y componentes principales;
-- `techniques.css`: estilos exclusivos de la sección educativa de técnicas;
-- `guide-cards.css`: tarjetas de acceso a las guías desde la portada;
-- `resources.css`: presentación compartida por las cinco páginas educativas;
-- `assets/social/sudolux-social.png`: tarjeta social 1200 × 630 para Open Graph y Twitter;
-- `hero-orbit.css`: presentación orbital del hero;
-- `script.js`: lógica de juego, candidatos y persistencia;
-- `game-accessibility.js`: semántica ARIA y gestión complementaria del foco del tablero;
-- las cinco páginas `.html` de guías: contenido educativo indexable sin lógica de juego duplicada.
+```bash
+git clone https://github.com/neuronova-apps/sudolux-app.git
+cd sudolux-app
+python3 -m http.server 8000
+```
 
-La separación evita mezclar el estado del juego con las capas de contenido, presentación y accesibilidad, y facilita revisar cada responsabilidad de manera independiente.
+Después abre `http://localhost:8000`.
 
-## Alcance de la aplicación
+La rama `main` corresponde a la web pública. La rama `android` mantiene el desarrollo móvil separado.
 
-La aplicación móvil se mantiene como una expansión futura de Sudolux y podrá incorporar progresivamente funciones que requieran una experiencia más amplia o persistente, como:
+## Estructura principal
 
-- dificultades configurables;
-- ayudas y pistas;
-- estadísticas de juego;
-- gestión de múltiples partidas y sincronización;
-- desafíos diarios;
-- sistema de XP y logros;
-- ranking;
-- diferentes modos de juego;
-- opciones adicionales de personalización.
+- `index.html`: portada, contenido educativo y demo;
+- `script.js`: lógica del Sudoku, candidatos y persistencia;
+- `game-accessibility.js`: ARIA y gestión de foco del tablero;
+- `styles.css`: sistema visual principal;
+- `hero-orbit.css`: hero orbital;
+- `techniques.css`: técnicas educativas;
+- `guide-cards.css` y `resources.css`: recursos públicos;
+- páginas HTML educativas: cinco guías indexables;
+- `privacy/`: política pública;
+- `assets/social/`: tarjeta social;
+- `sitemap.xml`: URLs públicas.
 
-Estas funciones no se consideran disponibles hasta estar implementadas y verificadas.
+## Enlaces
 
-## Desarrollo
+- **Web:** https://neuronova-apps.github.io/sudolux-app/
+- **Privacidad:** https://neuronova-apps.github.io/sudolux-app/privacy/
+- **Repositorio:** https://github.com/neuronova-apps/sudolux-app
+- **Ecosistema:** https://neuronova-apps.github.io/
 
-Sudolux se encuentra en desarrollo activo. La web es actualmente una **demo web funcional** que combina aprendizaje introductorio, guías públicas, técnicas básicas, una partida clásica jugable con candidatos y persistencia local de la partida en curso. La aplicación móvil continúa en la hoja de ruta como expansión futura, no como requisito para que la versión web tenga valor propio.
+## Neuronova Apps
 
-## Ecosistema
-
-Sudolux forma parte de [Neuronova Apps](https://neuronova-apps.github.io/), plataforma matriz que reúne distintos proyectos digitales desarrollados de manera independiente.
+Sudolux forma parte de **Neuronova Apps** y comparte con el resto de proyectos criterios comunes de identidad visual, accesibilidad, privacidad, SEO, documentación y publicación.
 
 ## Autoría
 
-Proyecto personal desarrollado por Gabriel Berrospi.
-
-## Estado
-
-**Demo web funcional en desarrollo activo.**
+Proyecto personal e independiente desarrollado por Gabriel Berrospi dentro del ecosistema Neuronova Apps.
