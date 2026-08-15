@@ -55,8 +55,32 @@
     gameStatus.focus({preventScroll: true});
   }
 
+  function normalizeFooterContact() {
+    const columns = [...document.querySelectorAll('.site-footer .footer-column')];
+    const contactColumn = columns.find(column => column.querySelector('h2')?.textContent.trim() === 'Proyecto');
+    if (!contactColumn) return;
+
+    contactColumn.replaceChildren();
+
+    const heading = document.createElement('h2');
+    heading.textContent = 'Contacto';
+
+    const email = document.createElement('a');
+    email.href = 'mailto:berm_km@hotmail.com';
+    email.textContent = 'berm_km@hotmail.com';
+
+    const location = document.createElement('span');
+    location.textContent = 'Pucallpa, Ucayali · Perú';
+
+    const project = document.createElement('span');
+    project.textContent = 'Proyecto independiente';
+
+    contactColumn.append(heading, email, location, project);
+  }
+
   createInstructions();
   syncGridAccessibility();
+  normalizeFooterContact();
 
   if (board && 'MutationObserver' in window) {
     const observer = new MutationObserver(syncGridAccessibility);
