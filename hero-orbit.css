@@ -117,7 +117,7 @@
   animation: sudoInnerCounterFree 43s linear infinite;
 }
 
-/* Núcleo Sudolux: mismo lenguaje visual del núcleo principal con favicon oficial */
+/* Núcleo Sudolux: mismo shell visual del núcleo principal, con símbolo propio */
 .s-core {
   width: 107px;
   height: 107px;
@@ -126,16 +126,19 @@
   display: grid;
   place-items: center;
   padding: 0;
-  border: 1px solid rgba(108,231,176,.34);
+  border: 1px solid rgba(101,221,255,.34);
   border-radius: 28px;
-  background:
-    url('favicon.svg') center 42% / 72px 72px no-repeat,
-    linear-gradient(145deg,rgba(13,31,47,.97),rgba(7,20,33,.98));
+  background-image:
+    url('assets/sudolux-core-mark.svg'),
+    linear-gradient(145deg,rgba(11,33,51,.96),rgba(6,19,32,.98));
+  background-repeat: no-repeat,no-repeat;
+  background-position: center 40%,center;
+  background-size: 55px auto,100% 100%;
   box-shadow:
     0 18px 44px rgba(0,0,0,.30),
-    0 0 34px rgba(108,231,176,.11),
-    inset 0 0 24px rgba(104,217,255,.045);
-  transform: rotate(-2deg);
+    0 0 34px rgba(101,221,255,.10),
+    inset 0 0 24px rgba(101,221,255,.045);
+  transform: rotate(-4deg);
   overflow: hidden;
 }
 
@@ -143,7 +146,7 @@
   content: "";
   position: absolute;
   inset: 7px;
-  border: 1px solid rgba(104,217,255,.18);
+  border: 1px solid rgba(127,156,255,.18);
   border-radius: 22px;
   pointer-events: none;
 }
@@ -152,13 +155,14 @@
   content: "SUDOLUX";
   position: absolute;
   left: 50%;
-  bottom: 10px;
+  bottom: 12px;
   transform: translateX(-50%);
-  color: #8298aa;
+  color: #7f93a9;
   font-size: .43rem;
-  font-weight: 850;
-  letter-spacing: .10em;
+  font-weight: 800;
+  letter-spacing: .07em;
   line-height: 1;
+  text-transform: uppercase;
 }
 
 .s-core-grid,
@@ -215,10 +219,10 @@
     width: 96px;
     height: 96px;
     border-radius: 25px;
-    background-size: 64px 64px,100% 100%;
+    background-size: 49px auto,100% 100%;
   }
   .s-core::before { border-radius: 19px; }
-  .s-core::after { bottom: 9px; font-size: .39rem; }
+  .s-core::after { bottom: 10px; font-size: .39rem; }
   .s-node { min-width: 58px; height: 40px; font-size: .60rem; }
   .s-chip { font-size: .54rem; }
   .s-node-left { left: -39px; }
