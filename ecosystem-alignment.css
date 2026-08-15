@@ -1,0 +1,163 @@
+/* Alineación de escala y márgenes de Sudolux con el portal principal Neuronova Apps */
+
+:root{
+  --max:1180px;
+}
+
+.container{
+  width:min(calc(100% - 36px),var(--max));
+  margin-inline:auto;
+}
+
+.site-header{
+  min-height:66px;
+}
+
+.header-inner{
+  min-height:66px;
+}
+
+.main-nav a{
+  padding:8px 12px;
+  font-size:.92rem;
+}
+
+/* Misma escala efectiva del hero del portal principal */
+.hero{
+  min-height:auto;
+  display:grid;
+  align-items:start;
+  padding:24px 0 28px;
+}
+
+.hero-grid{
+  grid-template-columns:minmax(0,1.08fr) minmax(330px,.92fr);
+  gap:clamp(30px,5vw,64px);
+  align-items:center;
+}
+
+.hero-copy{
+  max-width:720px;
+}
+
+.hero .eyebrow{
+  margin-bottom:10px;
+  font-size:.76rem;
+  letter-spacing:.145em;
+}
+
+.hero h1{
+  max-width:720px;
+  margin-bottom:15px;
+  font-size:clamp(2.15rem,4.25vw,4rem);
+  line-height:1.01;
+  letter-spacing:-.04em;
+}
+
+.hero .lead{
+  max-width:700px;
+  margin:0;
+  font-size:clamp(.94rem,1.3vw,1.05rem);
+  line-height:1.55;
+}
+
+.hero-actions{
+  margin-top:21px;
+}
+
+.hero .button{
+  min-height:46px;
+  padding:0 19px;
+  border-radius:14px;
+}
+
+.hero-metrics{
+  width:100%;
+  margin-top:26px;
+  padding:16px 18px;
+  border:1px solid rgba(157,194,224,.12);
+  border-radius:18px;
+  background:rgba(8,20,34,.38);
+}
+
+.hero-metrics>div{
+  flex:1 1 0;
+  min-width:0;
+  padding-right:18px;
+  margin-right:18px;
+}
+
+.hero-metrics strong{
+  font-size:1.1rem;
+}
+
+.hero-metrics span{
+  font-size:.76rem;
+}
+
+/* Mantiene la identidad orbital de Sudolux, pero con proporción equivalente */
+.hero-visual,
+.hero-orbit,
+.hero-system{
+  width:min(100%,430px);
+}
+
+/* Ritmo vertical equivalente en las secciones principales */
+.section{
+  padding:72px 0;
+}
+
+.section-heading{
+  gap:clamp(32px,6vw,72px);
+  margin-bottom:36px;
+}
+
+@media(max-width:900px){
+  .hero-grid{
+    grid-template-columns:1fr;
+  }
+
+  .hero-copy{
+    max-width:760px;
+  }
+
+  .hero-visual,
+  .hero-orbit,
+  .hero-system{
+    width:min(82vw,390px);
+    justify-self:center;
+  }
+}
+
+@media(max-width:700px){
+  .container{
+    width:min(calc(100% - 28px),var(--max));
+  }
+
+  .hero{
+    padding:20px 0 32px;
+  }
+
+  .hero h1{
+    font-size:clamp(1.9rem,9vw,3.1rem);
+    line-height:1.03;
+  }
+
+  .hero-metrics{
+    padding:14px 15px;
+  }
+
+  .hero-metrics>div{
+    flex:1 1 30%;
+    padding-right:10px;
+    margin-right:10px;
+  }
+
+  .hero-metrics span{
+    font-size:.68rem;
+  }
+
+  .section{
+    padding:58px 0;
+  }
+}
