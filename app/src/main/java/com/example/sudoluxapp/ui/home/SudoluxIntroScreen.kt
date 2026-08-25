@@ -1,10 +1,9 @@
 package com.example.sudoluxapp.ui.home
 
+import android.widget.ImageView
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -22,12 +21,13 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.viewinterop.AndroidView
+import com.example.sudoluxapp.R
 
 @Composable
 fun SudoluxIntroScreen(
@@ -43,14 +43,14 @@ fun SudoluxIntroScreen(
         modifier = modifier
             .fillMaxSize()
             .background(background)
-            .padding(horizontal = 26.dp, vertical = 28.dp),
+            .padding(horizontal = 26.dp, vertical = 24.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Spacer(Modifier.weight(1.55f))
+        Spacer(Modifier.weight(1.35f))
 
-        SudokuIntroMark(primary = primary)
+        SudoluxAppIcon(Modifier.size(144.dp))
 
-        Spacer(Modifier.height(28.dp))
+        Spacer(Modifier.height(24.dp))
 
         Text(
             text = "SUDOLUX",
@@ -63,10 +63,10 @@ fun SudoluxIntroScreen(
         Spacer(Modifier.height(12.dp))
 
         Text(
-            text = "Ejercita tu mente con\nsudoku y lógica",
+            text = "Ejercita tu mente con sudoku y desafíos de lógica",
             color = muted,
-            fontSize = 22.sp,
-            lineHeight = 29.sp,
+            fontSize = 20.sp,
+            lineHeight = 26.sp,
             textAlign = TextAlign.Center,
             fontWeight = FontWeight.Normal
         )
@@ -80,16 +80,16 @@ fun SudoluxIntroScreen(
         ) {
             IntroChip("Lógica", chipBorder, muted)
             IntroChip("Desafíos", chipBorder, muted, Modifier.padding(horizontal = 8.dp))
-            IntroChip("Concentración", chipBorder, muted)
+            IntroChip("Sudoku", chipBorder, muted)
         }
 
-        Spacer(Modifier.weight(1f))
+        Spacer(Modifier.weight(1.1f))
 
         Button(
             onClick = onStart,
             modifier = Modifier
                 .fillMaxWidth()
-                .height(60.dp),
+                .height(58.dp),
             shape = RoundedCornerShape(18.dp),
             colors = ButtonDefaults.buttonColors(
                 containerColor = primary,
@@ -141,68 +141,22 @@ private fun IntroChip(
 }
 
 @Composable
-private fun SudokuIntroMark(primary: Color) {
-    val outerShape = RoundedCornerShape(24.dp)
-    val cellShape = RoundedCornerShape(7.dp)
-    val cellBorder = primary.copy(alpha = 0.30f)
-    val markBackground = primary.copy(alpha = 0.035f)
-
-    Column(
-        modifier = Modifier
-            .size(116.dp)
-            .clip(outerShape)
-            .background(markBackground)
-            .border(1.5.dp, primary.copy(alpha = 0.34f), outerShape)
-            .padding(14.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.SpaceBetween
-    ) {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween
-        ) {
-            SudokuMarkCell("1", primary, cellBorder, cellShape)
-            SudokuMarkCell("6", primary, cellBorder, cellShape)
-            SudokuMarkCell("9", primary, cellBorder, cellShape)
-        }
-
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.Center
-        ) {
-            SudokuMarkCell("5", primary, cellBorder, cellShape)
-        }
-
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween
-        ) {
-            SudokuMarkCell("4", primary, cellBorder, cellShape)
-            SudokuMarkCell("8", primary, cellBorder, cellShape)
-            SudokuMarkCell("2", primary, cellBorder, cellShape)
-        }
-    }
-}
-
-@Composable
-private fun SudokuMarkCell(
-    value: String,
-    primary: Color,
-    borderColor: Color,
-    shape: RoundedCornerShape
+internal fun SudoluxAppIcon(
+    modifier: Modifier = Modifier,
+    contentDescription: String = "Icono de Sudolux"
 ) {
-    Box(
-        modifier = Modifier
-            .size(27.dp)
-            .background(MaterialTheme.colorScheme.surface, shape)
-            .border(1.dp, borderColor, shape),
-        contentAlignment = Alignment.Center
-    ) {
-        Text(
-            text = value,
-            color = primary,
-            fontSize = 15.sp,
-            fontWeight = FontWeight.Black
-        )
-    }
+    AndroidView(
+        modifier = modifier,
+        factory = { context ->
+            ImageView(context).apply {
+                adjustViewBounds = true
+                scaleType = ImageView.ScaleType.FIT_CENTER
+                setImageResource(R.mipmap.ic_launcher)
+                this.contentDescription = contentDescription
+            }
+        },
+        update = { imageView ->
+            imageView.contentDescription = contentDescription
+        }
+    )
 }
