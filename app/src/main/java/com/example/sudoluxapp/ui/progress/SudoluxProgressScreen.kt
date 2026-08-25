@@ -35,8 +35,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
@@ -51,14 +49,6 @@ import com.example.sudoluxapp.domain.progression.PlayerProgress
 import com.example.sudoluxapp.ui.navigation.SudoluxBottomBar
 import com.example.sudoluxapp.ui.navigation.SudoluxDestination
 import com.example.sudoluxapp.ui.theme.SudoluxAppTheme
-
-private val ProgressPrimary = Color(0xFF8CC8FF)
-private val ProgressDeepBlue = Color(0xFF0F2236)
-private val ProgressElevatedBlue = Color(0xFF1B344D)
-private val ProgressBorderBlue = Color(0xFF40566D)
-private val ProgressMutedText = Color(0xFFC4D5E7)
-private val LegendAccent = Color(0xFFFFC979)
-private val UnlockedAccent = Color(0xFF87E6C0)
 
 @Composable
 fun SudoluxProgressScreen(
@@ -166,7 +156,7 @@ private fun ProgressHeader(onBack: () -> Unit) {
             )
             Text(
                 text = "Tu recorrido en Sudolux",
-                color = ProgressMutedText,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
                 fontSize = 14.sp
             )
         }
@@ -176,14 +166,12 @@ private fun ProgressHeader(onBack: () -> Unit) {
 @Composable
 private fun LevelCard(level: ProgressLevelUiState) {
     val shape = RoundedCornerShape(22.dp)
+    val colors = MaterialTheme.colorScheme
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .background(
-                brush = Brush.linearGradient(listOf(ProgressElevatedBlue, ProgressDeepBlue)),
-                shape = shape
-            )
-            .border(1.dp, ProgressBorderBlue, shape)
+            .background(colors.surface, shape)
+            .border(1.dp, colors.outlineVariant, shape)
             .padding(18.dp)
             .semantics {
                 contentDescription = if (level.isMaximum) {
@@ -199,15 +187,20 @@ private fun LevelCard(level: ProgressLevelUiState) {
             Box(
                 modifier = Modifier
                     .size(64.dp)
-                    .background(ProgressPrimary.copy(alpha = 0.14f), CircleShape)
-                    .border(1.dp, ProgressPrimary.copy(alpha = 0.65f), CircleShape),
+                    .background(colors.primaryContainer, CircleShape)
+                    .border(1.dp, colors.primary, CircleShape),
                 contentAlignment = Alignment.Center
             ) {
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    Text("NIVEL", color = ProgressMutedText, fontSize = 9.sp, fontWeight = FontWeight.Bold)
+                    Text(
+                        "NIVEL",
+                        color = colors.onPrimaryContainer,
+                        fontSize = 9.sp,
+                        fontWeight = FontWeight.Bold
+                    )
                     Text(
                         level.level.toString(),
-                        color = ProgressPrimary,
+                        color = colors.primary,
                         fontSize = 25.sp,
                         fontWeight = FontWeight.Black
                     )
@@ -215,10 +208,15 @@ private fun LevelCard(level: ProgressLevelUiState) {
             }
             Spacer(Modifier.width(14.dp))
             Column(modifier = Modifier.weight(1f)) {
-                Text(level.title, fontSize = 22.sp, fontWeight = FontWeight.ExtraBold)
+                Text(
+                    level.title,
+                    color = colors.onSurface,
+                    fontSize = 22.sp,
+                    fontWeight = FontWeight.ExtraBold
+                )
                 Text(
                     "${level.totalXp} XP total",
-                    color = ProgressMutedText,
+                    color = colors.onSurfaceVariant,
                     fontSize = 14.sp
                 )
             }
@@ -229,13 +227,13 @@ private fun LevelCard(level: ProgressLevelUiState) {
             Surface(
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(14.dp),
-                color = LegendAccent.copy(alpha = 0.12f),
-                border = BorderStroke(1.dp, LegendAccent.copy(alpha = 0.7f))
+                color = colors.primaryContainer,
+                border = BorderStroke(1.dp, colors.primary)
             ) {
                 Text(
                     text = "Nivel máximo alcanzado",
                     modifier = Modifier.padding(14.dp),
-                    color = LegendAccent,
+                    color = colors.onPrimaryContainer,
                     textAlign = TextAlign.Center,
                     fontWeight = FontWeight.Bold
                 )
@@ -247,20 +245,20 @@ private fun LevelCard(level: ProgressLevelUiState) {
                     .fillMaxWidth()
                     .height(10.dp)
                     .clip(CircleShape),
-                color = ProgressPrimary,
-                trackColor = ProgressElevatedBlue
+                color = colors.primary,
+                trackColor = colors.surfaceVariant
             )
             Spacer(Modifier.height(10.dp))
             Row(modifier = Modifier.fillMaxWidth()) {
                 Text(
                     text = "${level.xpInLevel} / ${level.xpForNextLevel} XP",
-                    color = MaterialTheme.colorScheme.onSurface,
+                    color = colors.onSurface,
                     fontWeight = FontWeight.SemiBold,
                     modifier = Modifier.weight(1f)
                 )
                 Text(
                     text = "${level.xpRemaining} XP para Nivel ${level.level + 1}",
-                    color = ProgressMutedText,
+                    color = colors.onSurfaceVariant,
                     fontSize = 13.sp,
                     textAlign = TextAlign.End
                 )
@@ -274,8 +272,11 @@ private fun NextUnlockCard(nextUnlock: UnlockableUiState?) {
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(18.dp),
-        colors = CardDefaults.cardColors(containerColor = ProgressPrimary.copy(alpha = 0.11f)),
-        border = BorderStroke(1.dp, ProgressPrimary.copy(alpha = 0.7f))
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.primaryContainer,
+            contentColor = MaterialTheme.colorScheme.onPrimaryContainer
+        ),
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary)
     ) {
         Column(
             modifier = Modifier.padding(16.dp),
@@ -283,7 +284,7 @@ private fun NextUnlockCard(nextUnlock: UnlockableUiState?) {
         ) {
             Text(
                 text = "Próximo desbloqueo",
-                color = ProgressPrimary,
+                color = MaterialTheme.colorScheme.primary,
                 fontSize = 13.sp,
                 fontWeight = FontWeight.Bold
             )
@@ -296,7 +297,7 @@ private fun NextUnlockCard(nextUnlock: UnlockableUiState?) {
                 Text(nextUnlock.name, fontSize = 18.sp, fontWeight = FontWeight.ExtraBold)
                 Text(
                     text = "${nextUnlock.typeLabel} · ${nextUnlock.requirementLabel}",
-                    color = ProgressMutedText,
+                    color = MaterialTheme.colorScheme.onPrimaryContainer,
                     fontSize = 14.sp
                 )
             }
@@ -324,7 +325,11 @@ private fun MedalsSection(medals: List<MedalUiState>, modifier: Modifier = Modif
 @Composable
 private fun MedalCard(medal: MedalUiState, modifier: Modifier = Modifier) {
     val isLegend = medal.medal == Medal.LEGEND
-    val accent = if (isLegend) LegendAccent else ProgressPrimary
+    val accent = if (isLegend) {
+        MaterialTheme.colorScheme.secondary
+    } else {
+        MaterialTheme.colorScheme.primary
+    }
     Surface(
         modifier = modifier
             .heightIn(min = 76.dp)
@@ -332,8 +337,8 @@ private fun MedalCard(medal: MedalUiState, modifier: Modifier = Modifier) {
                 contentDescription = "Medalla ${medal.medal.displayName}, cantidad ${medal.count}"
             },
         shape = RoundedCornerShape(14.dp),
-        color = if (isLegend) LegendAccent.copy(alpha = 0.1f) else ProgressElevatedBlue,
-        border = BorderStroke(if (isLegend) 2.dp else 1.dp, accent.copy(alpha = 0.65f))
+        color = MaterialTheme.colorScheme.surfaceVariant,
+        border = BorderStroke(if (isLegend) 2.dp else 1.dp, accent)
     ) {
         Row(
             modifier = Modifier.padding(12.dp),
@@ -342,8 +347,8 @@ private fun MedalCard(medal: MedalUiState, modifier: Modifier = Modifier) {
             Box(
                 modifier = Modifier
                     .size(34.dp)
-                    .background(accent.copy(alpha = 0.16f), CircleShape)
-                    .border(1.dp, accent.copy(alpha = 0.7f), CircleShape),
+                    .background(MaterialTheme.colorScheme.primaryContainer, CircleShape)
+                    .border(1.dp, accent, CircleShape),
                 contentAlignment = Alignment.Center
             ) {
                 Text(
@@ -354,7 +359,12 @@ private fun MedalCard(medal: MedalUiState, modifier: Modifier = Modifier) {
             }
             Spacer(Modifier.width(9.dp))
             Column {
-                Text(medal.medal.displayName, fontSize = 13.sp, fontWeight = FontWeight.Bold)
+                Text(
+                    medal.medal.displayName,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    fontSize = 13.sp,
+                    fontWeight = FontWeight.Bold
+                )
                 Text("×${medal.count}", color = accent, fontSize = 18.sp, fontWeight = FontWeight.ExtraBold)
             }
         }
@@ -367,22 +377,23 @@ private fun MasterySection(
     milestones: List<MasteryMilestoneUiState>,
     modifier: Modifier = Modifier
 ) {
+    val colors = MaterialTheme.colorScheme
     ProgressSectionCard(title = "Maestría absoluta", modifier = modifier) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             Box(
                 modifier = Modifier
                     .size(58.dp)
-                    .background(LegendAccent.copy(alpha = 0.13f), CircleShape)
-                    .border(1.dp, LegendAccent.copy(alpha = 0.75f), CircleShape),
+                    .background(colors.primaryContainer, CircleShape)
+                    .border(1.dp, colors.primary, CircleShape),
                 contentAlignment = Alignment.Center
             ) {
-                Text("×$count", color = LegendAccent, fontSize = 21.sp, fontWeight = FontWeight.Black)
+                Text("×$count", color = colors.primary, fontSize = 21.sp, fontWeight = FontWeight.Black)
             }
             Spacer(Modifier.width(12.dp))
             Text(
                 text = "Completa Maestro sin pistas y sin errores.",
                 modifier = Modifier.weight(1f),
-                color = ProgressMutedText,
+                color = colors.onSurfaceVariant,
                 fontSize = 13.sp,
                 lineHeight = 18.sp
             )
@@ -402,13 +413,13 @@ private fun MasterySection(
                         },
                     shape = RoundedCornerShape(12.dp),
                     color = if (milestone.reached) {
-                        UnlockedAccent.copy(alpha = 0.13f)
+                        colors.primaryContainer
                     } else {
-                        ProgressElevatedBlue
+                        colors.surfaceVariant
                     },
                     border = BorderStroke(
                         1.dp,
-                        if (milestone.reached) UnlockedAccent else ProgressBorderBlue
+                        if (milestone.reached) colors.primary else colors.outlineVariant
                     )
                 ) {
                     Column(
@@ -417,12 +428,16 @@ private fun MasterySection(
                     ) {
                         Text(
                             "×${milestone.target}",
-                            color = if (milestone.reached) UnlockedAccent else ProgressMutedText,
+                            color = if (milestone.reached) colors.primary else colors.onSurfaceVariant,
                             fontWeight = FontWeight.ExtraBold
                         )
                         Text(
                             if (milestone.reached) "Alcanzado" else "Bloqueado",
-                            color = ProgressMutedText,
+                            color = if (milestone.reached) {
+                                colors.onPrimaryContainer
+                            } else {
+                                colors.onSurfaceVariant
+                            },
                             fontSize = 9.sp,
                             maxLines = 1
                         )
@@ -452,14 +467,18 @@ private fun UnlockGroup(
 ) {
     Text(
         text = "$title · ${unlocks.size}",
-        color = if (unlocked) UnlockedAccent else ProgressMutedText,
+        color = if (unlocked) {
+            MaterialTheme.colorScheme.secondary
+        } else {
+            MaterialTheme.colorScheme.onSurfaceVariant
+        },
         fontSize = 14.sp,
         fontWeight = FontWeight.Bold
     )
     if (unlocks.isEmpty()) {
         Text(
             text = if (unlocked) "Aún no hay desbloqueos obtenidos." else "No quedan desbloqueos pendientes.",
-            color = ProgressMutedText,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
             fontSize = 13.sp
         )
     } else {
@@ -470,7 +489,11 @@ private fun UnlockGroup(
 @Composable
 private fun UnlockableRow(unlock: UnlockableUiState) {
     val statusLabel = if (unlock.isUnlocked) "Desbloqueado" else "Bloqueado"
-    val accent = if (unlock.isUnlocked) UnlockedAccent else ProgressMutedText
+    val accent = if (unlock.isUnlocked) {
+        MaterialTheme.colorScheme.secondary
+    } else {
+        MaterialTheme.colorScheme.onSurfaceVariant
+    }
     Surface(
         modifier = Modifier
             .fillMaxWidth()
@@ -479,8 +502,11 @@ private fun UnlockableRow(unlock: UnlockableUiState) {
                     "${unlock.requirementLabel}, $statusLabel"
             },
         shape = RoundedCornerShape(13.dp),
-        color = ProgressElevatedBlue,
-        border = BorderStroke(1.dp, if (unlock.isUnlocked) UnlockedAccent.copy(alpha = 0.55f) else ProgressBorderBlue)
+        color = MaterialTheme.colorScheme.surfaceVariant,
+        border = BorderStroke(
+            1.dp,
+            if (unlock.isUnlocked) MaterialTheme.colorScheme.secondary else MaterialTheme.colorScheme.outlineVariant
+        )
     ) {
         Row(
             modifier = Modifier.padding(12.dp),
@@ -494,10 +520,14 @@ private fun UnlockableRow(unlock: UnlockableUiState) {
             )
             Spacer(Modifier.width(10.dp))
             Column(modifier = Modifier.weight(1f)) {
-                Text(unlock.name, fontWeight = FontWeight.Bold)
+                Text(
+                    unlock.name,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    fontWeight = FontWeight.Bold
+                )
                 Text(
                     text = "${unlock.typeLabel} · ${unlock.requirementLabel}",
-                    color = ProgressMutedText,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                     fontSize = 12.sp
                 )
             }
@@ -511,7 +541,7 @@ private fun StatisticsPlaceholder() {
     ProgressSectionCard(title = "Estadísticas") {
         Text(
             text = "Las estadísticas de partidas aparecerán aquí cuando existan datos persistidos fiables.",
-            color = ProgressMutedText,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
             fontSize = 13.sp,
             lineHeight = 18.sp
         )
@@ -527,20 +557,28 @@ private fun ProgressSectionCard(
     Card(
         modifier = modifier.fillMaxWidth(),
         shape = RoundedCornerShape(20.dp),
-        colors = CardDefaults.cardColors(containerColor = ProgressDeepBlue),
-        border = BorderStroke(1.dp, ProgressBorderBlue)
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surface,
+            contentColor = MaterialTheme.colorScheme.onSurface
+        ),
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)
     ) {
         Column(
             modifier = Modifier.padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            Text(title, fontSize = 18.sp, fontWeight = FontWeight.ExtraBold)
+            Text(
+                title,
+                color = MaterialTheme.colorScheme.onSurface,
+                fontSize = 18.sp,
+                fontWeight = FontWeight.ExtraBold
+            )
             content()
         }
     }
 }
 
-@Preview(showBackground = true, backgroundColor = 0xFF081421, widthDp = 390, heightDp = 844)
+@Preview(showBackground = true, widthDp = 390, heightDp = 844)
 @Composable
 private fun SudoluxProgressScreenPreview() {
     SudoluxAppTheme {
