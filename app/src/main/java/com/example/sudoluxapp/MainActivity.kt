@@ -15,6 +15,7 @@ import com.example.sudoluxapp.domain.premium.PremiumFeatureFlags
 import com.example.sudoluxapp.domain.progression.GameMode
 import com.example.sudoluxapp.ui.game.SudokuGameScreen
 import com.example.sudoluxapp.ui.home.SudoluxHomeScreen
+import com.example.sudoluxapp.ui.home.SudoluxIntroScreen
 import com.example.sudoluxapp.ui.navigation.SudoluxAppScreen
 import com.example.sudoluxapp.ui.progress.PlayerProgressViewModel
 import com.example.sudoluxapp.ui.progress.ProgressScreenPresenter
@@ -33,6 +34,7 @@ class MainActivity : ComponentActivity() {
         setContent {
             val settings by settingsViewModel.settings
             SudoluxAppTheme(settings = settings) {
+                var showIntro by rememberSaveable { mutableStateOf(true) }
                 var currentScreen by rememberSaveable { mutableStateOf(SudoluxAppScreen.HOME) }
                 var playRequest by rememberSaveable { mutableIntStateOf(0) }
                 var selectedDifficulty by rememberSaveable { mutableStateOf("Difícil") }
@@ -43,87 +45,96 @@ class MainActivity : ComponentActivity() {
                     ProgressScreenPresenter.present(playerProgress)
                 }
 
-                when (currentScreen) {
-                    SudoluxAppScreen.GAME -> {
-                        SudokuGameScreen(
-                            difficulty = currentGame?.puzzle?.difficulty?.displayName ?: selectedDifficulty,
-                            mode = currentGame?.mode ?: selectedMode,
-                            game = currentGame,
-                            accessTier = PremiumFeatureFlags.currentTier,
-                            onGameChange = appViewModel::updateGame,
-                            onGameCompleted = appViewModel::applyResult,
-                            settings = settings,
-                            onProgress = { currentScreen = SudoluxAppScreen.PROGRESS },
-                            onBack = { currentScreen = SudoluxAppScreen.HOME }
-                        )
-                    }
-
-                    SudoluxAppScreen.PROGRESS -> {
-                        SudoluxProgressScreen(
-                            uiState = progressUiState,
-                            onHome = { currentScreen = SudoluxAppScreen.HOME },
-                            onPlay = {
-                                playRequest++
-                                currentScreen = SudoluxAppScreen.HOME
-                            },
-                            onBack = { currentScreen = SudoluxAppScreen.HOME }
-                        )
-                    }
-
-                    SudoluxAppScreen.HOME -> {
-                        val resumableGame = currentGame?.takeUnless {
-                            it.showVictory || it.attemptFinished
+                if (showIntro) {
+                    SudoluxIntroScreen(
+                        onStart = {
+                            showIntro = false
+                            currentScreen = SudoluxAppScreen.HOME
                         }
-                        SudoluxHomeScreen(
-                            playerProgress = playerProgress,
-                            activeGame = resumableGame,
-                            playRequest = playRequest,
-                            onPlayRequestHandled = { playRequest = 0 },
-                            onStartGame = { difficulty, mode ->
-                                appViewModel.discardActiveGame()
-                                selectedDifficulty = difficulty
-                                selectedMode = mode
-                                currentScreen = SudoluxAppScreen.GAME
-                            },
-                            onContinueGame = {
-                                resumableGame?.let { game ->
-                                    selectedDifficulty = game.puzzle.difficulty.displayName
-                                    selectedMode = game.mode
-                                    currentScreen = SudoluxAppScreen.GAME
-                                }
-                            },
-                            onProgress = {
-                                currentScreen = SudoluxAppScreen.PROGRESS
-                            },
-                            onSettings = {
-                                currentScreen = SudoluxAppScreen.SETTINGS
+                    )
+                } else {
+                    when (currentScreen) {
+                        SudoluxAppScreen.GAME -> {
+                            SudokuGameScreen(
+                                difficulty = currentGame?.puzzle?.difficulty?.displayName ?: selectedDifficulty,
+                                mode = currentGame?.mode ?: selectedMode,
+                                game = currentGame,
+                                accessTier = PremiumFeatureFlags.currentTier,
+                                onGameChange = appViewModel::updateGame,
+                                onGameCompleted = appViewModel::applyResult,
+                                settings = settings,
+                                onProgress = { currentScreen = SudoluxAppScreen.PROGRESS },
+                                onBack = { currentScreen = SudoluxAppScreen.HOME }
+                            )
+                        }
+
+                        SudoluxAppScreen.PROGRESS -> {
+                            SudoluxProgressScreen(
+                                uiState = progressUiState,
+                                onHome = { currentScreen = SudoluxAppScreen.HOME },
+                                onPlay = {
+                                    playRequest++
+                                    currentScreen = SudoluxAppScreen.HOME
+                                },
+                                onBack = { currentScreen = SudoluxAppScreen.HOME }
+                            )
+                        }
+
+                        SudoluxAppScreen.HOME -> {
+                            val resumableGame = currentGame?.takeUnless {
+                                it.showVictory || it.attemptFinished
                             }
-                        )
-                    }
+                            SudoluxHomeScreen(
+                                playerProgress = playerProgress,
+                                activeGame = resumableGame,
+                                playRequest = playRequest,
+                                onPlayRequestHandled = { playRequest = 0 },
+                                onStartGame = { difficulty, mode ->
+                                    appViewModel.discardActiveGame()
+                                    selectedDifficulty = difficulty
+                                    selectedMode = mode
+                                    currentScreen = SudoluxAppScreen.GAME
+                                },
+                                onContinueGame = {
+                                    resumableGame?.let { game ->
+                                        selectedDifficulty = game.puzzle.difficulty.displayName
+                                        selectedMode = game.mode
+                                        currentScreen = SudoluxAppScreen.GAME
+                                    }
+                                },
+                                onProgress = {
+                                    currentScreen = SudoluxAppScreen.PROGRESS
+                                },
+                                onSettings = {
+                                    currentScreen = SudoluxAppScreen.SETTINGS
+                                }
+                            )
+                        }
 
-                    SudoluxAppScreen.SETTINGS -> {
-                        SudoluxSettingsScreen(
-                            settings = settings,
-                            onThemeChange = settingsViewModel::setTheme,
-                            onHighContrastChange = settingsViewModel::setHighContrast,
-                            onNumberSizeChange = settingsViewModel::setNumberSize,
-                            onReduceAnimationsChange = settingsViewModel::setReduceAnimations,
-                            onSoundChange = settingsViewModel::setSoundEnabled,
-                            onHapticsChange = settingsViewModel::setHapticsEnabled,
-                            onAutoCleanNotesChange = settingsViewModel::setAutoCleanNotes,
-                            onShowErrorsChange = settingsViewModel::setShowErrorsImmediately,
-                            onHighlightMatchingChange = settingsViewModel::setHighlightMatchingNumbers,
-                            onHighlightRelatedChange = settingsViewModel::setHighlightRelatedArea,
-                            onReset = settingsViewModel::reset,
-                            onAbout = { currentScreen = SudoluxAppScreen.ABOUT },
-                            onBack = { currentScreen = SudoluxAppScreen.HOME }
-                        )
-                    }
+                        SudoluxAppScreen.SETTINGS -> {
+                            SudoluxSettingsScreen(
+                                settings = settings,
+                                onThemeChange = settingsViewModel::setTheme,
+                                onHighContrastChange = settingsViewModel::setHighContrast,
+                                onNumberSizeChange = settingsViewModel::setNumberSize,
+                                onReduceAnimationsChange = settingsViewModel::setReduceAnimations,
+                                onSoundChange = settingsViewModel::setSoundEnabled,
+                                onHapticsChange = settingsViewModel::setHapticsEnabled,
+                                onAutoCleanNotesChange = settingsViewModel::setAutoCleanNotes,
+                                onShowErrorsChange = settingsViewModel::setShowErrorsImmediately,
+                                onHighlightMatchingChange = settingsViewModel::setHighlightMatchingNumbers,
+                                onHighlightRelatedChange = settingsViewModel::setHighlightRelatedArea,
+                                onReset = settingsViewModel::reset,
+                                onAbout = { currentScreen = SudoluxAppScreen.ABOUT },
+                                onBack = { currentScreen = SudoluxAppScreen.HOME }
+                            )
+                        }
 
-                    SudoluxAppScreen.ABOUT -> {
-                        SudoluxAboutScreen(
-                            onBack = { currentScreen = SudoluxAppScreen.SETTINGS }
-                        )
+                        SudoluxAppScreen.ABOUT -> {
+                            SudoluxAboutScreen(
+                                onBack = { currentScreen = SudoluxAppScreen.SETTINGS }
+                            )
+                        }
                     }
                 }
             }
