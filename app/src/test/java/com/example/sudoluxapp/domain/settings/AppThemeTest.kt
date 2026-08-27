@@ -33,15 +33,17 @@ class AppThemeTest {
 
     @Test
     fun levelThemesUnlockAtTheirExactBoundaries() {
-        val levelNine = progressAtLevel(9)
-        val levelTen = progressAtLevel(10)
+        val levelFourteen = progressAtLevel(14)
+        val levelFifteen = progressAtLevel(15)
         val levelTwentyFive = progressAtLevel(25)
         val levelFifty = progressAtLevel(50)
 
-        assertFalse(AppTheme.FOREST.isUnlocked(levelNine))
-        assertTrue(AppTheme.FOREST.isUnlocked(levelTen))
-        assertFalse(AppTheme.AMBAR.isUnlocked(levelTen))
+        assertFalse(AppTheme.FOREST.isUnlocked(levelFourteen))
+        assertTrue(AppTheme.FOREST.isUnlocked(levelFifteen))
+        assertEquals("Alcanza nivel 15", AppTheme.FOREST.unlockDescription)
+        assertFalse(AppTheme.AMBAR.isUnlocked(levelFifteen))
         assertTrue(AppTheme.AMBAR.isUnlocked(levelTwentyFive))
+        assertFalse(AppTheme.MASTER.isUnlocked(progressAtLevel(49)))
         assertFalse(AppTheme.MASTER.isUnlocked(levelTwentyFive))
         assertTrue(AppTheme.MASTER.isUnlocked(levelFifty))
     }
@@ -58,6 +60,10 @@ class AppThemeTest {
         assertEquals(
             AppTheme.NIGHT,
             ThemeSelectionPolicy.select(initial, AppTheme.NIGHT, newPlayer).theme
+        )
+        assertEquals(
+            AppTheme.FOREST,
+            ThemeSelectionPolicy.select(initial, AppTheme.FOREST, progressAtLevel(15)).theme
         )
     }
 

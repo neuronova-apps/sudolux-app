@@ -50,6 +50,7 @@ import androidx.compose.ui.unit.sp
 import androidx.core.content.pm.PackageInfoCompat
 import com.example.sudoluxapp.R
 import com.example.sudoluxapp.ui.home.SudoluxAppIcon
+import com.example.sudoluxapp.ui.theme.sudoluxScreenContainerColor
 import java.util.Calendar
 
 private const val PRIVACY_URL = "https://neuronova-apps.github.io/privacy/sudolux/"
@@ -69,7 +70,7 @@ fun SudoluxAboutScreen(onBack: () -> Unit, modifier: Modifier = Modifier) {
 
     Scaffold(
         modifier = modifier.fillMaxSize(),
-        containerColor = MaterialTheme.colorScheme.background,
+        containerColor = sudoluxScreenContainerColor(),
         contentWindowInsets = WindowInsets.safeDrawing
     ) { innerPadding ->
         LazyColumn(

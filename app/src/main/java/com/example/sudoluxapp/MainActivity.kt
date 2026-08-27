@@ -24,6 +24,8 @@ import com.example.sudoluxapp.ui.settings.SettingsViewModel
 import com.example.sudoluxapp.ui.settings.SudoluxAboutScreen
 import com.example.sudoluxapp.ui.settings.SudoluxSettingsScreen
 import com.example.sudoluxapp.ui.theme.SudoluxAppTheme
+import com.example.sudoluxapp.ui.theme.SudoluxBackgroundRole
+import com.example.sudoluxapp.ui.theme.SudoluxThemeBackground
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -44,16 +46,22 @@ class MainActivity : ComponentActivity() {
                 val progressUiState = remember(playerProgress) {
                     ProgressScreenPresenter.present(playerProgress)
                 }
+                val backgroundRole = when {
+                    showIntro || currentScreen == SudoluxAppScreen.HOME -> SudoluxBackgroundRole.HOME
+                    currentScreen == SudoluxAppScreen.GAME -> SudoluxBackgroundRole.GAME
+                    else -> SudoluxBackgroundRole.SECONDARY
+                }
 
-                if (showIntro) {
-                    SudoluxIntroScreen(
-                        onStart = {
-                            showIntro = false
-                            currentScreen = SudoluxAppScreen.HOME
-                        }
-                    )
-                } else {
-                    when (currentScreen) {
+                SudoluxThemeBackground(role = backgroundRole) {
+                    if (showIntro) {
+                        SudoluxIntroScreen(
+                            onStart = {
+                                showIntro = false
+                                currentScreen = SudoluxAppScreen.HOME
+                            }
+                        )
+                    } else {
+                        when (currentScreen) {
                         SudoluxAppScreen.GAME -> {
                             SudokuGameScreen(
                                 difficulty = currentGame?.puzzle?.difficulty?.displayName ?: selectedDifficulty,
@@ -137,6 +145,7 @@ class MainActivity : ComponentActivity() {
                             SudoluxAboutScreen(
                                 onBack = { currentScreen = SudoluxAppScreen.SETTINGS }
                             )
+                        }
                         }
                     }
                 }

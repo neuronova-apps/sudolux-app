@@ -40,7 +40,11 @@ fun SudoluxBottomBar(
     onDestinationSelected: (SudoluxDestination) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    NavigationBar(modifier = modifier) {
+    NavigationBar(
+        modifier = modifier,
+        containerColor = MaterialTheme.colorScheme.surface,
+        contentColor = MaterialTheme.colorScheme.onSurface
+    ) {
         SudoluxDestination.entries.forEach { destination ->
             val isSelected = selectedDestination == destination
             NavigationBarItem(

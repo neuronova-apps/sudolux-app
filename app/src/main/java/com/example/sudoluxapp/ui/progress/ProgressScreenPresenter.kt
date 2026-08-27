@@ -8,6 +8,7 @@ import com.example.sudoluxapp.domain.progression.UnlockRequirement
 import com.example.sudoluxapp.domain.progression.Unlockable
 import com.example.sudoluxapp.domain.progression.UnlockableCatalog
 import com.example.sudoluxapp.domain.progression.UnlockableType
+import com.example.sudoluxapp.domain.sudoku.SudokuDifficulty
 
 data class ProgressLevelUiState(
     val level: Int,
@@ -32,11 +33,27 @@ data class UnlockableUiState(
     val isUnlocked: Boolean
 )
 
+data class DifficultyStatisticsUiState(
+    val difficulty: SudokuDifficulty,
+    val withoutHints: Int,
+    val withHints: Int,
+    val total: Int
+)
+
+data class GameStatisticsUiState(
+    val difficulties: List<DifficultyStatisticsUiState>,
+    val withoutHints: Int,
+    val withHints: Int,
+    val totalCompleted: Int,
+    val historicalUnclassified: Int
+)
+
 data class ProgressScreenUiState(
     val level: ProgressLevelUiState,
     val medals: List<MedalUiState>,
     val absoluteMasteryCount: Int,
     val masteryMilestones: List<MasteryMilestoneUiState>,
+    val statistics: GameStatisticsUiState,
     val unlocked: List<UnlockableUiState>,
     val locked: List<UnlockableUiState>,
     val nextUnlock: UnlockableUiState?
@@ -59,6 +76,7 @@ object ProgressScreenPresenter {
                 .thenBy { -it.catalogIndex }
         )
 
+        val statistics = progress.statistics
         return ProgressScreenUiState(
             level = ProgressLevelUiState(
                 level = level.level,
@@ -75,6 +93,21 @@ object ProgressScreenPresenter {
             masteryMilestones = ProgressionCalculator.absoluteMasteryMilestones.map { target ->
                 MasteryMilestoneUiState(target, progress.absoluteMasteryCount >= target)
             },
+            statistics = GameStatisticsUiState(
+                difficulties = SudokuDifficulty.entries.map { difficulty ->
+                    val counts = statistics.forDifficulty(difficulty)
+                    DifficultyStatisticsUiState(
+                        difficulty = difficulty,
+                        withoutHints = counts.withoutHints,
+                        withHints = counts.withHints,
+                        total = counts.total
+                    )
+                },
+                withoutHints = statistics.withoutHints,
+                withHints = statistics.withHints,
+                totalCompleted = statistics.totalCompleted,
+                historicalUnclassified = statistics.historicalUnclassified
+            ),
             unlocked = unlocks.filter { it.value.isUnlocked }.map { it.value },
             locked = locked.map { it.value },
             nextUnlock = next?.value

@@ -11,7 +11,8 @@ data class PlayerProgress(
     val medalCounts: Map<Medal, Int> = Medal.entries.associateWith { 0 },
     val absoluteMasteryCount: Int = 0,
     val unlockedIds: Set<String> = emptySet(),
-    val processedGameIds: Set<String> = emptySet()
+    val processedGameIds: Set<String> = emptySet(),
+    val completedGameRecords: Map<String, CompletedGameRecord> = emptyMap()
 ) {
     val level: PlayerLevel get() = PlayerLevelCalculator.calculate(totalXp)
     val currentLevel: Int get() = level.level
@@ -23,6 +24,8 @@ data class PlayerProgress(
     val legendMedalCount: Int get() = medalCount(Medal.LEGEND)
     /** Cada victoria válida concede exactamente una medalla, por lo que no se duplica el conteo. */
     val completedSudokus: Int get() = medalCounts.values.sum()
+    val statistics: GameStatistics
+        get() = GameStatistics.from(completedGameRecords.values, completedSudokus)
 
     fun medalCount(medal: Medal): Int = medalCounts[medal] ?: 0
 }

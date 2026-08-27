@@ -1,6 +1,7 @@
 package com.example.sudoluxapp.ui.home
 
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
@@ -72,6 +73,9 @@ import com.example.sudoluxapp.ui.game.SudokuGameState
 import com.example.sudoluxapp.ui.navigation.SudoluxBottomBar
 import com.example.sudoluxapp.ui.navigation.SudoluxDestination
 import com.example.sudoluxapp.ui.theme.SudoluxAppTheme
+import com.example.sudoluxapp.ui.theme.LocalSudoluxThemeConfig
+import com.example.sudoluxapp.ui.theme.forDifficulty
+import com.example.sudoluxapp.ui.theme.sudoluxScreenContainerColor
 import kotlinx.coroutines.launch
 
 private val Primary: Color
@@ -132,7 +136,7 @@ fun SudoluxHomeScreen(
 
     Scaffold(
         modifier = modifier.fillMaxSize(),
-        containerColor = MaterialTheme.colorScheme.background,
+        containerColor = sudoluxScreenContainerColor(),
         contentWindowInsets = WindowInsets.safeDrawing,
         snackbarHost = {
             SnackbarHost(snackbarHostState) { data ->
@@ -274,6 +278,7 @@ fun SudoluxHomeScreen(
 
 @Composable
 private fun HomeHeader(onSettings: () -> Unit) {
+    val themeIcon = LocalSudoluxThemeConfig.current.drawables?.icon
     Row(
         modifier = Modifier.fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically
@@ -289,12 +294,20 @@ private fun HomeHeader(onSettings: () -> Unit) {
                 ),
             contentAlignment = Alignment.Center
         ) {
-            Text(
-                text = "S",
-                color = MaterialTheme.colorScheme.onPrimary,
-                fontSize = 22.sp,
-                fontWeight = FontWeight.Black
-            )
+            if (themeIcon == null) {
+                Text(
+                    text = "S",
+                    color = MaterialTheme.colorScheme.onPrimary,
+                    fontSize = 22.sp,
+                    fontWeight = FontWeight.Black
+                )
+            } else {
+                Image(
+                    painter = painterResource(themeIcon),
+                    contentDescription = null,
+                    modifier = Modifier.size(38.dp)
+                )
+            }
         }
         Spacer(Modifier.width(11.dp))
         Column(modifier = Modifier.weight(1f)) {
@@ -379,6 +392,11 @@ private fun PlayerProgressCard(progress: PlayerProgress) {
             Column(modifier = Modifier.weight(1f)) {
                 Text(level.title, fontSize = 19.sp, fontWeight = FontWeight.ExtraBold)
                 Text("${level.totalXp} XP total", color = MutedText, fontSize = 13.sp)
+                Text(
+                    "${progress.completedSudokus} Sudokus completados",
+                    color = MutedText,
+                    fontSize = 12.sp
+                )
             }
             if (level.level < 100) {
                 Text(
@@ -598,6 +616,8 @@ private fun DifficultySection(
         ) {
             items(difficulties) { difficulty ->
                 val isSelected = difficulty == selectedDifficulty
+                val icon = LocalSudoluxThemeConfig.current.drawables?.difficultyIcons
+                    ?.forDifficulty(SudokuDifficulty.fromDisplayName(difficulty))
                 Surface(
                     onClick = { onDifficultySelected(difficulty) },
                     modifier = Modifier
@@ -614,10 +634,19 @@ private fun DifficultySection(
                         color = if (isSelected) Primary else BorderColor
                     )
                 ) {
-                    Box(
+                    Row(
                         modifier = Modifier.padding(horizontal = 14.dp, vertical = 11.dp),
-                        contentAlignment = Alignment.Center
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.Center
                     ) {
+                        if (icon != null) {
+                            Image(
+                                painter = painterResource(icon),
+                                contentDescription = null,
+                                modifier = Modifier.size(24.dp)
+                            )
+                            Spacer(Modifier.width(6.dp))
+                        }
                         Text(
                             text = if (isSelected) "✓ $difficulty" else difficulty,
                             color = if (isSelected) Primary else MaterialTheme.colorScheme.onSurface,

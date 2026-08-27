@@ -30,6 +30,8 @@ class PlayerProgressStateTest {
         assertTrue(first.rewardApplied)
         assertEquals(first.progress, duplicate.progress)
         assertFalse(duplicate.rewardApplied)
+        assertEquals(1, duplicate.progress.completedSudokus)
+        assertEquals(1, duplicate.progress.statistics.classifiedTotal)
     }
 
     @Test

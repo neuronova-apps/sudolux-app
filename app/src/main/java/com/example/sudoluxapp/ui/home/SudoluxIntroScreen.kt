@@ -28,6 +28,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
 import com.example.sudoluxapp.R
+import com.example.sudoluxapp.ui.theme.sudoluxScreenContainerColor
 
 @Composable
 fun SudoluxIntroScreen(
@@ -35,7 +36,7 @@ fun SudoluxIntroScreen(
     modifier: Modifier = Modifier
 ) {
     val primary = MaterialTheme.colorScheme.primary
-    val background = MaterialTheme.colorScheme.background
+    val background = sudoluxScreenContainerColor()
     val muted = MaterialTheme.colorScheme.onSurfaceVariant
     val chipBorder = MaterialTheme.colorScheme.outlineVariant
 

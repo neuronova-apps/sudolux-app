@@ -2,6 +2,8 @@ package com.example.sudoluxapp.data
 
 import com.example.sudoluxapp.domain.premium.AccessTier
 import com.example.sudoluxapp.domain.progression.GameMode
+import com.example.sudoluxapp.domain.progression.CompletedGameRecord
+import com.example.sudoluxapp.domain.progression.GameCompletionStatus
 import com.example.sudoluxapp.domain.progression.Medal
 import com.example.sudoluxapp.domain.progression.PlayerProgress
 import com.example.sudoluxapp.testutil.SudokuTestFixtures
@@ -31,13 +33,48 @@ class SudoluxRepositoryTest {
             medalCounts = Medal.entries.associateWith { it.ordinal + 2 },
             absoluteMasteryCount = 5,
             unlockedIds = setOf("background_1", "special_master_background"),
-            processedGameIds = setOf("game-1", "game-2")
+            processedGameIds = setOf("game-1", "game-2"),
+            completedGameRecords = mapOf(
+                "game-1" to CompletedGameRecord(
+                    difficulty = com.example.sudoluxapp.domain.sudoku.SudokuDifficulty.EASY,
+                    hintsUsed = 0,
+                    completedAtEpochMillis = 123456L,
+                    xpEarned = 75,
+                    status = GameCompletionStatus.COMPLETED
+                ),
+                "game-2" to CompletedGameRecord(
+                    difficulty = com.example.sudoluxapp.domain.sudoku.SudokuDifficulty.MASTER,
+                    hintsUsed = 3,
+                    completedAtEpochMillis = 234567L,
+                    xpEarned = 360
+                )
+            )
         )
 
         SudoluxRepository(storage).saveProgress(expected)
         val restored = SudoluxRepository(storage).loadProgress()
 
         assertEquals(expected, restored)
+    }
+
+    @Test
+    fun legacyProgressWithoutDetailedRecordsKeepsItsCompletedTotalUnclassified() {
+        val storage = MemoryStorage()
+        storage.replace(
+            emptySet(),
+            mapOf(
+                "progress.xp" to "500",
+                "progress.medal.BRONZE" to "4",
+                "progress.medal.GOLD" to "2"
+            )
+        )
+
+        val restored = SudoluxRepository(storage).loadProgress()
+
+        assertEquals(6, restored.completedSudokus)
+        assertEquals(6, restored.statistics.totalCompleted)
+        assertEquals(6, restored.statistics.historicalUnclassified)
+        assertEquals(0, restored.statistics.classifiedTotal)
     }
 
     @Test

@@ -23,7 +23,8 @@ object ProgressionCalculator {
     fun applyResult(
         current: PlayerProgress,
         gameId: String,
-        result: GameResult
+        result: GameResult,
+        completedAtEpochMillis: Long = System.currentTimeMillis()
     ): ProgressUpdate {
         require(gameId.isNotBlank()) { "El identificador de partida no puede estar vacío." }
         val previousLevel = current.currentLevel
@@ -51,7 +52,15 @@ object ProgressionCalculator {
             totalXp = current.totalXp + result.xpEarned,
             medalCounts = updatedMedals,
             absoluteMasteryCount = current.absoluteMasteryCount + masteryIncrement,
-            processedGameIds = current.processedGameIds + gameId
+            processedGameIds = current.processedGameIds + gameId,
+            completedGameRecords = current.completedGameRecords + (
+                gameId to CompletedGameRecord(
+                    difficulty = result.performance.difficulty,
+                    hintsUsed = result.performance.hintsUsed,
+                    completedAtEpochMillis = completedAtEpochMillis,
+                    xpEarned = result.xpEarned
+                )
+            )
         )
         val availableUnlocks = UnlockableCatalog.unlocked(updatedBase)
         val updated = updatedBase.copy(

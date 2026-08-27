@@ -3,6 +3,8 @@ package com.example.sudoluxapp.ui.progress
 import com.example.sudoluxapp.domain.progression.Medal
 import com.example.sudoluxapp.domain.progression.PlayerLevelCalculator
 import com.example.sudoluxapp.domain.progression.PlayerProgress
+import com.example.sudoluxapp.domain.progression.CompletedGameRecord
+import com.example.sudoluxapp.domain.sudoku.SudokuDifficulty
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNull
@@ -108,6 +110,27 @@ class ProgressScreenPresenterTest {
 
         assertTrue(state.locked.isEmpty())
         assertNull(state.nextUnlock)
+    }
+
+    @Test
+    fun statisticsPresentAllDifficultiesAndPreserveHistoricalUnclassifiedTotal() {
+        val progress = PlayerProgress(
+            medalCounts = mapOf(Medal.BRONZE to 4),
+            completedGameRecords = mapOf(
+                "easy-clean" to CompletedGameRecord(SudokuDifficulty.EASY, 0, 10L, 75),
+                "easy-helped" to CompletedGameRecord(SudokuDifficulty.EASY, 1, 20L, 60)
+            )
+        )
+
+        val statistics = ProgressScreenPresenter.present(progress).statistics
+        val easy = statistics.difficulties.single { it.difficulty == SudokuDifficulty.EASY }
+
+        assertEquals(SudokuDifficulty.entries, statistics.difficulties.map { it.difficulty })
+        assertEquals(1, easy.withoutHints)
+        assertEquals(1, easy.withHints)
+        assertEquals(2, easy.total)
+        assertEquals(4, statistics.totalCompleted)
+        assertEquals(2, statistics.historicalUnclassified)
     }
 
     private fun xpToReach(level: Int): Int =

@@ -3,6 +3,8 @@ package com.example.sudoluxapp.data
 import android.content.Context
 import android.content.SharedPreferences
 import androidx.core.content.edit
+import com.example.sudoluxapp.domain.progression.CompletedGameRecord
+import com.example.sudoluxapp.domain.progression.GameCompletionStatus
 import com.example.sudoluxapp.domain.progression.GameMode
 import com.example.sudoluxapp.domain.progression.Medal
 import com.example.sudoluxapp.domain.progression.PlayerProgress
@@ -48,7 +50,8 @@ class SudoluxRepository(private val storage: KeyValueStorage) {
             medalCounts = medals,
             absoluteMasteryCount = mastery,
             unlockedIds = decodeSet(storage.get(PROGRESS_UNLOCKS)),
-            processedGameIds = decodeSet(storage.get(PROGRESS_PROCESSED_GAMES))
+            processedGameIds = decodeSet(storage.get(PROGRESS_PROCESSED_GAMES)),
+            completedGameRecords = decodeCompletedGames(storage.get(PROGRESS_COMPLETED_GAMES))
         )
     }
 
@@ -58,6 +61,7 @@ class SudoluxRepository(private val storage: KeyValueStorage) {
             put(PROGRESS_MASTERY, progress.absoluteMasteryCount.toString())
             put(PROGRESS_UNLOCKS, encodeSet(progress.unlockedIds))
             put(PROGRESS_PROCESSED_GAMES, encodeSet(progress.processedGameIds))
+            put(PROGRESS_COMPLETED_GAMES, encodeCompletedGames(progress.completedGameRecords))
             Medal.entries.forEach { medal ->
                 put("$PROGRESS_MEDAL_PREFIX${medal.name}", progress.medalCount(medal).toString())
             }
@@ -161,15 +165,58 @@ class SudoluxRepository(private val storage: KeyValueStorage) {
         ?.toSet()
         ?: emptySet()
 
+    /**
+     * Migración aditiva: la ausencia de esta clave representa progreso histórico sin detalle.
+     * Las medallas siguen siendo la fuente del total y nunca se sintetizan dificultad ni pistas.
+     */
+    private fun decodeCompletedGames(value: String?): Map<String, CompletedGameRecord> = value
+        ?.takeIf(String::isNotEmpty)
+        ?.split(RECORD_SEPARATOR)
+        ?.mapNotNull(::decodeCompletedGame)
+        ?.toMap()
+        ?: emptyMap()
+
+    private fun encodeCompletedGames(records: Map<String, CompletedGameRecord>): String =
+        records.toSortedMap().entries.joinToString(RECORD_SEPARATOR) { (gameId, record) ->
+            listOf(
+                COMPLETED_GAME_FORMAT_VERSION,
+                gameId,
+                record.difficulty.name,
+                record.hintsUsed.toString(),
+                record.completedAtEpochMillis.toString(),
+                record.xpEarned.toString(),
+                record.status.name
+            ).joinToString(FIELD_SEPARATOR)
+        }
+
+    private fun decodeCompletedGame(encoded: String): Pair<String, CompletedGameRecord>? =
+        runCatching {
+            val fields = encoded.split(FIELD_SEPARATOR)
+            require(fields.size == 7 && fields[0] == COMPLETED_GAME_FORMAT_VERSION)
+            val gameId = fields[1]
+            require(gameId.isNotBlank())
+            gameId to CompletedGameRecord(
+                difficulty = SudokuDifficulty.valueOf(fields[2]),
+                hintsUsed = fields[3].toInt(),
+                completedAtEpochMillis = fields[4].toLong(),
+                xpEarned = fields[5].toInt(),
+                status = GameCompletionStatus.valueOf(fields[6])
+            )
+        }.getOrNull()
+
     private fun String?.toBooleanStrictOrFalse(): Boolean = this == TRUE
 
     private companion object {
         const val TRUE = "true"
         const val SET_SEPARATOR = "\u001F"
+        const val RECORD_SEPARATOR = "\u001E"
+        const val FIELD_SEPARATOR = "\u001D"
+        const val COMPLETED_GAME_FORMAT_VERSION = "1"
         const val PROGRESS_XP = "progress.xp"
         const val PROGRESS_MASTERY = "progress.mastery"
         const val PROGRESS_UNLOCKS = "progress.unlocks"
         const val PROGRESS_PROCESSED_GAMES = "progress.processed_games"
+        const val PROGRESS_COMPLETED_GAMES = "progress.completed_games"
         const val PROGRESS_MEDAL_PREFIX = "progress.medal."
 
         const val GAME_ACTIVE = "game.active"

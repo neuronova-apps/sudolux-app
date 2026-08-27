@@ -1,53 +1,38 @@
 package com.example.sudoluxapp.ui.theme
 
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material3.ColorScheme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.staticCompositionLocalOf
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import com.example.sudoluxapp.domain.settings.AppTheme
 import com.example.sudoluxapp.domain.settings.UserSettings
 
-private val DarkColorScheme = darkColorScheme(
-    primary = SudoluxPrimary,
-    onPrimary = Color(0xFF003353),
-    primaryContainer = SudoluxPrimaryContainer,
-    onPrimaryContainer = Color(0xFFD6ECFF),
-    secondary = SudoluxSecondary,
-    onSecondary = Color(0xFF00354D),
+private val CommonDarkErrors = darkColorScheme(
     error = Color(0xFFFFB8C5),
     onError = Color(0xFF5B1127),
     errorContainer = Color(0xFF3A2631),
-    onErrorContainer = Color(0xFFFFD9E0),
-    background = SudoluxBackground,
-    onBackground = SudoluxOnBackground,
-    surface = SudoluxSurface,
-    onSurface = SudoluxOnBackground,
-    surfaceVariant = SudoluxSurfaceHigh,
-    onSurfaceVariant = SudoluxOnSurfaceVariant,
-    outline = SudoluxOutline,
-    outlineVariant = SudoluxOutlineVariant
+    onErrorContainer = Color(0xFFFFD9E0)
 )
 
-private val LightColorScheme = lightColorScheme(
-    primary = Color(0xFF00649A),
-    onPrimary = Color.White,
-    primaryContainer = Color(0xFFCDE9FF),
-    onPrimaryContainer = Color(0xFF002033),
-    secondary = Color(0xFF006683),
-    onSecondary = Color.White,
+private val CommonLightErrors = lightColorScheme(
     error = Color(0xFFB3263E),
     onError = Color.White,
     errorContainer = Color(0xFFFFE8EC),
-    onErrorContainer = Color(0xFF7A1F32),
-    background = Color(0xFFF5FAFF),
-    onBackground = Color(0xFF0B1F2E),
-    surface = Color(0xFFFFFFFF),
-    onSurface = Color(0xFF0B1F2E),
-    surfaceVariant = Color(0xFFE3EEF7),
-    onSurfaceVariant = Color(0xFF405464),
-    outline = Color(0xFF607786),
-    outlineVariant = Color(0xFFB9C9D5)
+    onErrorContainer = Color(0xFF7A1F32)
 )
 
 private val HighContrastDarkColorScheme = darkColorScheme(
@@ -92,28 +77,143 @@ private val HighContrastLightColorScheme = lightColorScheme(
     outlineVariant = Color(0xFF344B5A)
 )
 
+enum class SudoluxBackgroundRole { HOME, GAME, SECONDARY }
+
+data class ResolvedSudoluxTheme(
+    val config: SudoluxThemeConfig,
+    val colors: ColorScheme
+)
+
+val LocalSudoluxThemeConfig = staticCompositionLocalOf {
+    SudoluxThemeCatalog[AppTheme.CLASSIC]
+}
+
+@Composable
+fun sudoluxScreenContainerColor(): Color =
+    if (LocalSudoluxThemeConfig.current.drawables == null) {
+        MaterialTheme.colorScheme.background
+    } else {
+        Color.Transparent
+    }
+
+fun resolveSudoluxTheme(settings: UserSettings): ResolvedSudoluxTheme {
+    val config = SudoluxThemeCatalog[settings.theme]
+    val base = config.palette.toColorScheme()
+    val colors = when {
+        settings.highContrast && settings.theme == AppTheme.NIGHT -> HighContrastDarkColorScheme
+        settings.highContrast && settings.theme == AppTheme.CLASSIC -> HighContrastLightColorScheme
+        settings.highContrast -> base.highContrast(config.palette.isDark)
+        else -> base
+    }
+    return ResolvedSudoluxTheme(config, colors)
+}
+
+private fun SudoluxThemePalette.toColorScheme(): ColorScheme {
+    val errors = if (isDark) CommonDarkErrors else CommonLightErrors
+    return if (isDark) {
+        darkColorScheme(
+            primary = primary,
+            onPrimary = onPrimary,
+            primaryContainer = primaryContainer,
+            onPrimaryContainer = onPrimaryContainer,
+            secondary = secondary,
+            onSecondary = onSecondary,
+            error = errors.error,
+            onError = errors.onError,
+            errorContainer = errors.errorContainer,
+            onErrorContainer = errors.onErrorContainer,
+            background = background,
+            onBackground = onBackground,
+            surface = surface,
+            onSurface = onSurface,
+            surfaceVariant = surfaceVariant,
+            onSurfaceVariant = onSurfaceVariant,
+            outline = outline,
+            outlineVariant = outlineVariant
+        )
+    } else {
+        lightColorScheme(
+            primary = primary,
+            onPrimary = onPrimary,
+            primaryContainer = primaryContainer,
+            onPrimaryContainer = onPrimaryContainer,
+            secondary = secondary,
+            onSecondary = onSecondary,
+            error = errors.error,
+            onError = errors.onError,
+            errorContainer = errors.errorContainer,
+            onErrorContainer = errors.onErrorContainer,
+            background = background,
+            onBackground = onBackground,
+            surface = surface,
+            onSurface = onSurface,
+            surfaceVariant = surfaceVariant,
+            onSurfaceVariant = onSurfaceVariant,
+            outline = outline,
+            outlineVariant = outlineVariant
+        )
+    }
+}
+
+private fun ColorScheme.highContrast(dark: Boolean): ColorScheme = copy(
+    onBackground = if (dark) Color.White else Color.Black,
+    onSurface = if (dark) Color.White else Color.Black,
+    onSurfaceVariant = if (dark) Color.White else Color.Black,
+    outline = if (dark) Color.White else Color.Black,
+    outlineVariant = if (dark) Color(0xFFD6E6F0) else Color(0xFF27352C)
+)
+
 @Composable
 fun SudoluxAppTheme(
     settings: UserSettings = UserSettings.Default,
     content: @Composable () -> Unit
 ) {
-    val darkTheme = when (settings.theme) {
-        AppTheme.NIGHT -> true
-        AppTheme.CLASSIC,
-        AppTheme.OCEAN,
-        AppTheme.FOREST,
-        AppTheme.AMBAR,
-        AppTheme.MASTER -> false
+    val resolved = resolveSudoluxTheme(settings)
+    CompositionLocalProvider(LocalSudoluxThemeConfig provides resolved.config) {
+        MaterialTheme(
+            colorScheme = resolved.colors,
+            typography = Typography,
+            content = content
+        )
     }
-    val colors = when {
-        settings.highContrast && darkTheme -> HighContrastDarkColorScheme
-        settings.highContrast -> HighContrastLightColorScheme
-        darkTheme -> DarkColorScheme
-        else -> LightColorScheme
+}
+
+@Composable
+fun SudoluxThemeBackground(
+    role: SudoluxBackgroundRole,
+    modifier: Modifier = Modifier,
+    content: @Composable () -> Unit
+) {
+    val config = LocalSudoluxThemeConfig.current
+    val drawable = config.drawables?.backgrounds?.let { backgrounds ->
+        when (role) {
+            SudoluxBackgroundRole.HOME -> backgrounds.home
+            SudoluxBackgroundRole.GAME -> backgrounds.game
+            SudoluxBackgroundRole.SECONDARY -> backgrounds.secondary
+        }
     }
-    MaterialTheme(
-        colorScheme = colors,
-        typography = Typography,
-        content = content
-    )
+    Box(
+        modifier = modifier
+            .fillMaxSize()
+            .background(MaterialTheme.colorScheme.background)
+            .testTag("sudolux_theme_root_${config.theme.name}")
+            .semantics {
+                contentDescription = "Tema visual ${config.theme.displayName}, fondo ${role.name.lowercase()}"
+            }
+    ) {
+        if (drawable != null) {
+            Image(
+                painter = painterResource(drawable),
+                contentDescription = null,
+                modifier = Modifier.fillMaxSize(),
+                contentScale = ContentScale.Crop
+            )
+            Box(
+                Modifier
+                    .fillMaxSize()
+                    .background(config.palette.backgroundScrim)
+            )
+        }
+        content()
+    }
 }

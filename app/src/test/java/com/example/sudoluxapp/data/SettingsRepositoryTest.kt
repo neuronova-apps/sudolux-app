@@ -53,6 +53,17 @@ class SettingsRepositoryTest {
     }
 
     @Test
+    fun everyThemeSurvivesRepositoryRecreationAndAppReopenEquivalent() {
+        AppTheme.entries.forEach { theme ->
+            val storage = MemoryStorage()
+            SettingsRepository(storage).save(UserSettings.Default.copy(theme = theme))
+
+            assertEquals(theme, SettingsRepository(storage).load().theme)
+            assertEquals(theme, SettingsRepository(storage).load().theme)
+        }
+    }
+
+    @Test
     fun savedThemeIsNotOverwrittenByClassicDefault() {
         val storage = MemoryStorage()
         SettingsRepository(storage).save(UserSettings.Default.copy(theme = AppTheme.NIGHT))

@@ -130,6 +130,30 @@ class SudoluxHomeScreenTest {
         composeRule.onNodeWithContentDescription("Nivel 1", substring = true).assertExists()
     }
 
+    @Test
+    fun progressStatisticsSectionShowsEveryDifficultyAndBothHintColumns() {
+        composeRule.setContent {
+            SudoluxAppTheme {
+                SudoluxProgressScreen(
+                    uiState = ProgressScreenPresenter.present(PlayerProgress()),
+                    onHome = { },
+                    onPlay = { },
+                    onBack = { }
+                )
+            }
+        }
+
+        composeRule.onNodeWithContentDescription("Sección Estadísticas").performClick()
+
+        SudokuDifficulty.entries.forEach { difficulty ->
+            composeRule.onNodeWithContentDescription(
+                "${difficulty.displayName}, sin pistas 0, con pistas 0, total 0"
+            ).assertExists()
+        }
+        composeRule.onNodeWithContentDescription("Total, sin pistas 0, con pistas 0, total 0")
+            .assertExists()
+    }
+
     private fun activeGame(): SudokuGameState = SudokuGameState(
         puzzle = SudokuPuzzle(
             initialBoard = List(81) { 0 },

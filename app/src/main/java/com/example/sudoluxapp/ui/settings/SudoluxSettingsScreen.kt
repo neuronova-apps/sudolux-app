@@ -63,6 +63,7 @@ import com.example.sudoluxapp.domain.settings.SudokuNumberSize
 import com.example.sudoluxapp.domain.settings.UserSettings
 import com.example.sudoluxapp.ui.theme.SudoluxThemeCatalog
 import com.example.sudoluxapp.ui.theme.SudoluxThemeConfig
+import com.example.sudoluxapp.ui.theme.sudoluxScreenContainerColor
 
 @Composable
 fun SudoluxSettingsScreen(
@@ -88,7 +89,7 @@ fun SudoluxSettingsScreen(
 
     Scaffold(
         modifier = modifier.fillMaxSize(),
-        containerColor = MaterialTheme.colorScheme.background,
+        containerColor = sudoluxScreenContainerColor(),
         contentWindowInsets = WindowInsets.safeDrawing
     ) { innerPadding ->
         BoxWithConstraints(
@@ -186,7 +187,8 @@ fun SudoluxSettingsScreen(
             },
             dismissButton = {
                 TextButton(onClick = { showResetConfirmation = false }) { Text("Cancelar") }
-            }
+            },
+            containerColor = MaterialTheme.colorScheme.surface
         )
     }
 }

@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -32,11 +33,18 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.role
+import androidx.compose.ui.semantics.selected
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -49,6 +57,7 @@ import com.example.sudoluxapp.domain.progression.PlayerProgress
 import com.example.sudoluxapp.ui.navigation.SudoluxBottomBar
 import com.example.sudoluxapp.ui.navigation.SudoluxDestination
 import com.example.sudoluxapp.ui.theme.SudoluxAppTheme
+import com.example.sudoluxapp.ui.theme.sudoluxScreenContainerColor
 
 @Composable
 fun SudoluxProgressScreen(
@@ -59,10 +68,11 @@ fun SudoluxProgressScreen(
     modifier: Modifier = Modifier
 ) {
     BackHandler(onBack = onBack)
+    var selectedSection by rememberSaveable { mutableStateOf(ProgressSection.SUMMARY) }
 
     Scaffold(
         modifier = modifier.fillMaxSize(),
-        containerColor = MaterialTheme.colorScheme.background,
+        containerColor = sudoluxScreenContainerColor(),
         bottomBar = {
             SudoluxBottomBar(
                 selectedDestination = SudoluxDestination.PROGRESS,
@@ -93,39 +103,115 @@ fun SudoluxProgressScreen(
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
                 item { ProgressHeader(onBack) }
-                item { LevelCard(uiState.level) }
-                item { NextUnlockCard(uiState.nextUnlock) }
                 item {
-                    if (isLandscape) {
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.spacedBy(16.dp),
-                            verticalAlignment = Alignment.Top
-                        ) {
-                            MedalsSection(uiState.medals, Modifier.weight(1f))
-                            MasterySection(
-                                count = uiState.absoluteMasteryCount,
-                                milestones = uiState.masteryMilestones,
-                                modifier = Modifier.weight(1f)
-                            )
+                    ProgressSectionSelector(
+                        selected = selectedSection,
+                        onSelected = { selectedSection = it }
+                    )
+                }
+                when (selectedSection) {
+                    ProgressSection.SUMMARY -> {
+                        item { LevelCard(uiState.level) }
+                        item { NextUnlockCard(uiState.nextUnlock) }
+                    }
+
+                    ProgressSection.STATISTICS -> {
+                        item { StatisticsSection(uiState.statistics) }
+                    }
+
+                    ProgressSection.ACHIEVEMENTS -> {
+                        item {
+                            if (isLandscape) {
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.spacedBy(16.dp),
+                                    verticalAlignment = Alignment.Top
+                                ) {
+                                    MedalsSection(uiState.medals, Modifier.weight(1f))
+                                    MasterySection(
+                                        count = uiState.absoluteMasteryCount,
+                                        milestones = uiState.masteryMilestones,
+                                        modifier = Modifier.weight(1f)
+                                    )
+                                }
+                            } else {
+                                Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
+                                    MedalsSection(uiState.medals)
+                                    MasterySection(
+                                        count = uiState.absoluteMasteryCount,
+                                        milestones = uiState.masteryMilestones
+                                    )
+                                }
+                            }
                         }
-                    } else {
-                        Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
-                            MedalsSection(uiState.medals)
-                            MasterySection(
-                                count = uiState.absoluteMasteryCount,
-                                milestones = uiState.masteryMilestones
+                        item {
+                            PersonalizationSection(
+                                unlocked = uiState.unlocked,
+                                locked = uiState.locked
                             )
                         }
                     }
                 }
-                item {
-                    PersonalizationSection(
-                        unlocked = uiState.unlocked,
-                        locked = uiState.locked
+            }
+        }
+    }
+}
+
+private enum class ProgressSection(val label: String) {
+    SUMMARY("Resumen"),
+    STATISTICS("Estadísticas"),
+    ACHIEVEMENTS("Logros")
+}
+
+@Composable
+private fun ProgressSectionSelector(
+    selected: ProgressSection,
+    onSelected: (ProgressSection) -> Unit
+) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.spacedBy(7.dp)
+    ) {
+        ProgressSection.entries.forEach { section ->
+            val isSelected = section == selected
+            Surface(
+                onClick = { onSelected(section) },
+                modifier = Modifier
+                    .weight(1f)
+                    .heightIn(min = 46.dp)
+                    .semantics {
+                        this.selected = isSelected
+                        role = Role.Tab
+                        contentDescription = "Sección ${section.label}"
+                    },
+                shape = RoundedCornerShape(14.dp),
+                color = if (isSelected) {
+                    MaterialTheme.colorScheme.primaryContainer
+                } else {
+                    MaterialTheme.colorScheme.surface
+                },
+                border = BorderStroke(
+                    if (isSelected) 2.dp else 1.dp,
+                    if (isSelected) {
+                        MaterialTheme.colorScheme.primary
+                    } else {
+                        MaterialTheme.colorScheme.outlineVariant
+                    }
+                )
+            ) {
+                Box(Modifier.padding(horizontal = 4.dp, vertical = 10.dp), contentAlignment = Alignment.Center) {
+                    Text(
+                        section.label,
+                        color = if (isSelected) {
+                            MaterialTheme.colorScheme.onPrimaryContainer
+                        } else {
+                            MaterialTheme.colorScheme.onSurfaceVariant
+                        },
+                        fontSize = 12.sp,
+                        fontWeight = if (isSelected) FontWeight.ExtraBold else FontWeight.Bold,
+                        maxLines = 1
                     )
                 }
-                item { StatisticsPlaceholder() }
             }
         }
     }
@@ -307,7 +393,7 @@ private fun NextUnlockCard(nextUnlock: UnlockableUiState?) {
 
 @Composable
 private fun MedalsSection(medals: List<MedalUiState>, modifier: Modifier = Modifier) {
-    ProgressSectionCard(title = "Medallas", modifier = modifier) {
+    ProgressSectionCard(title = "Trofeos y medallas", modifier = modifier) {
         medals.chunked(2).forEach { rowMedals ->
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -537,15 +623,103 @@ private fun UnlockableRow(unlock: UnlockableUiState) {
 }
 
 @Composable
-private fun StatisticsPlaceholder() {
+private fun StatisticsSection(statistics: GameStatisticsUiState) {
     ProgressSectionCard(title = "Estadísticas") {
-        Text(
-            text = "Las estadísticas de partidas aparecerán aquí cuando existan datos persistidos fiables.",
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            fontSize = 13.sp,
-            lineHeight = 18.sp
+        StatisticsHeader()
+        statistics.difficulties.forEach { row ->
+            StatisticsRow(
+                label = row.difficulty.displayName,
+                withoutHints = row.withoutHints,
+                withHints = row.withHints,
+                total = row.total
+            )
+        }
+        StatisticsRow(
+            label = "Total",
+            withoutHints = statistics.withoutHints,
+            withHints = statistics.withHints,
+            total = statistics.totalCompleted,
+            emphasized = true
         )
+        if (statistics.historicalUnclassified > 0) {
+            Text(
+                text = "${statistics.historicalUnclassified} partidas históricas conservadas " +
+                    "sin dificultad ni uso de pistas clasificables.",
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                fontSize = 12.sp,
+                lineHeight = 17.sp
+            )
+        }
     }
+}
+
+@Composable
+private fun StatisticsHeader() {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        StatisticsCell("Dificultad", 1.5f, TextAlign.Start, true)
+        StatisticsCell("Sin\npistas", 1f, TextAlign.Center, true)
+        StatisticsCell("Con\npistas", 1f, TextAlign.Center, true)
+        StatisticsCell("Total", 0.8f, TextAlign.End, true)
+    }
+}
+
+@Composable
+private fun StatisticsRow(
+    label: String,
+    withoutHints: Int,
+    withHints: Int,
+    total: Int,
+    emphasized: Boolean = false
+) {
+    val background = if (emphasized) {
+        MaterialTheme.colorScheme.primaryContainer
+    } else {
+        MaterialTheme.colorScheme.surfaceVariant
+    }
+    Surface(
+        modifier = Modifier
+            .fillMaxWidth()
+            .semantics {
+                contentDescription = "$label, sin pistas $withoutHints, con pistas $withHints, total $total"
+            },
+        shape = RoundedCornerShape(12.dp),
+        color = background,
+        border = BorderStroke(
+            1.dp,
+            if (emphasized) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outlineVariant
+        )
+    ) {
+        Row(
+            modifier = Modifier.padding(horizontal = 10.dp, vertical = 11.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            StatisticsCell(label, 1.5f, TextAlign.Start, emphasized)
+            StatisticsCell(withoutHints.toString(), 1f, TextAlign.Center, emphasized)
+            StatisticsCell(withHints.toString(), 1f, TextAlign.Center, emphasized)
+            StatisticsCell(total.toString(), 0.8f, TextAlign.End, true)
+        }
+    }
+}
+
+@Composable
+private fun RowScope.StatisticsCell(
+    text: String,
+    weight: Float,
+    alignment: TextAlign,
+    bold: Boolean
+) {
+    Text(
+        text = text,
+        modifier = Modifier.weight(weight),
+        color = MaterialTheme.colorScheme.onSurface,
+        fontSize = 11.sp,
+        lineHeight = 13.sp,
+        fontWeight = if (bold) FontWeight.Bold else FontWeight.Medium,
+        textAlign = alignment
+    )
 }
 
 @Composable

@@ -35,7 +35,7 @@ enum class AppTheme(
     CLASSIC("Clásico claro", ThemeUnlockRequirement.AvailableFromStart),
     NIGHT("Noche", ThemeUnlockRequirement.AvailableFromStart),
     OCEAN("Océano", ThemeUnlockRequirement.CompletedSudokus(10)),
-    FOREST("Bosque", ThemeUnlockRequirement.Level(10)),
+    FOREST("Bosque", ThemeUnlockRequirement.Level(15)),
     AMBAR("Ámbar", ThemeUnlockRequirement.Level(25)),
     MASTER("Maestro", ThemeUnlockRequirement.Level(50));
 

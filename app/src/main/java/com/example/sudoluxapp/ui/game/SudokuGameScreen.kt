@@ -3,6 +3,7 @@ package com.example.sudoluxapp.ui.game
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
@@ -79,6 +80,9 @@ import com.example.sudoluxapp.domain.premium.AccessTier
 import com.example.sudoluxapp.domain.settings.SudokuNumberSize
 import com.example.sudoluxapp.domain.settings.UserSettings
 import com.example.sudoluxapp.ui.theme.SudoluxAppTheme
+import com.example.sudoluxapp.ui.theme.LocalSudoluxThemeConfig
+import com.example.sudoluxapp.ui.theme.forDifficulty
+import com.example.sudoluxapp.ui.theme.sudoluxScreenContainerColor
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
@@ -141,7 +145,7 @@ fun SudokuGameScreen(
 
     Scaffold(
         modifier = modifier.fillMaxSize(),
-        containerColor = MaterialTheme.colorScheme.background,
+        containerColor = sudoluxScreenContainerColor(),
         contentWindowInsets = WindowInsets.safeDrawing,
         snackbarHost = {
             SnackbarHost(snackbarHostState) { data ->
@@ -502,7 +506,7 @@ private fun SudokuLoadingScreen(
 ) {
     Scaffold(
         modifier = modifier.fillMaxSize(),
-        containerColor = MaterialTheme.colorScheme.background,
+        containerColor = sudoluxScreenContainerColor(),
         contentWindowInsets = WindowInsets.safeDrawing
     ) { innerPadding ->
         Column(
@@ -542,6 +546,8 @@ private fun GameHeader(
     compact: Boolean,
     onBack: () -> Unit
 ) {
+    val difficultyIcon = LocalSudoluxThemeConfig.current.drawables?.difficultyIcons
+        ?.forDifficulty(SudokuDifficulty.fromDisplayName(difficulty))
     Column(verticalArrangement = Arrangement.spacedBy(if (compact) 6.dp else 10.dp)) {
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -587,12 +593,20 @@ private fun GameHeader(
                 border = BorderStroke(1.dp, GamePrimary.copy(alpha = 0.65f))
             ) {
                 Box(contentAlignment = Alignment.Center) {
-                    Text(
-                        "9×9",
-                        color = GamePrimary,
-                        fontSize = if (compact) 11.sp else 13.sp,
-                        fontWeight = FontWeight.Bold
-                    )
+                    if (difficultyIcon == null) {
+                        Text(
+                            "9×9",
+                            color = GamePrimary,
+                            fontSize = if (compact) 11.sp else 13.sp,
+                            fontWeight = FontWeight.Bold
+                        )
+                    } else {
+                        Image(
+                            painter = painterResource(difficultyIcon),
+                            contentDescription = null,
+                            modifier = Modifier.size(if (compact) 34.dp else 42.dp)
+                        )
+                    }
                 }
             }
         }
@@ -1162,11 +1176,21 @@ private fun VictoryDialog(
     onNewGame: () -> Unit,
     onProgress: () -> Unit
 ) {
+    val rewardBadge = LocalSudoluxThemeConfig.current.drawables?.badgeReward
     AlertDialog(
         onDismissRequest = { },
         title = { Text("Sudoku completado", fontWeight = FontWeight.ExtraBold) },
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                if (rewardBadge != null) {
+                    Image(
+                        painter = painterResource(rewardBadge),
+                        contentDescription = null,
+                        modifier = Modifier
+                            .size(68.dp)
+                            .align(Alignment.CenterHorizontally)
+                    )
+                }
                 Text(result.performance.difficulty.displayName, fontWeight = FontWeight.Bold)
                 Text(result.performance.mode.displayName)
                 Text("${result.performance.errors} errores")
