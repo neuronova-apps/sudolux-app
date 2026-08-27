@@ -1,6 +1,7 @@
 package com.example.sudoluxapp.ui.home
 
 import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.assertTextContains
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
@@ -56,8 +57,8 @@ class SudoluxHomeScreenTest {
             }
         }
 
-        composeRule.onNodeWithContentDescription("Continuar partida activa").assertExists()
-        composeRule.onNodeWithText("Fácil").assertExists()
+        composeRule.onNodeWithContentDescription("Continuar partida activa")
+            .assertTextContains("Fácil")
         composeRule.onNodeWithText("1/3 errores").assertExists()
     }
 
@@ -125,7 +126,7 @@ class SudoluxHomeScreenTest {
             }
         }
 
-        composeRule.onNodeWithText("Progreso").assertExists()
+        composeRule.onNodeWithContentDescription("Progreso, navegación principal").assertExists()
         composeRule.onNodeWithContentDescription("Nivel 1", substring = true).assertExists()
     }
 
