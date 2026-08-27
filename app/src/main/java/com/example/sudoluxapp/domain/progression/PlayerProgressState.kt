@@ -21,6 +21,8 @@ data class PlayerProgress(
     val progressToNextLevel: Float get() = level.progress
     val unlocked: List<Unlockable> get() = UnlockableCatalog.all.filter { it.id in unlockedIds }
     val legendMedalCount: Int get() = medalCount(Medal.LEGEND)
+    /** Cada victoria válida concede exactamente una medalla, por lo que no se duplica el conteo. */
+    val completedSudokus: Int get() = medalCounts.values.sum()
 
     fun medalCount(medal: Medal): Int = medalCounts[medal] ?: 0
 }

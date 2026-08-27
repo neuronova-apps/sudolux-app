@@ -4,7 +4,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.ui.graphics.Color
 import com.example.sudoluxapp.domain.settings.AppTheme
 import com.example.sudoluxapp.domain.settings.UserSettings
@@ -99,9 +98,12 @@ fun SudoluxAppTheme(
     content: @Composable () -> Unit
 ) {
     val darkTheme = when (settings.theme) {
-        AppTheme.DARK -> true
-        AppTheme.LIGHT -> false
-        AppTheme.SYSTEM -> isSystemInDarkTheme()
+        AppTheme.NIGHT -> true
+        AppTheme.CLASSIC,
+        AppTheme.OCEAN,
+        AppTheme.FOREST,
+        AppTheme.AMBAR,
+        AppTheme.MASTER -> false
     }
     val colors = when {
         settings.highContrast && darkTheme -> HighContrastDarkColorScheme

@@ -18,7 +18,7 @@ class SettingsRepositoryTest {
     fun newStorageUsesDocumentedDefaults() {
         assertEquals(UserSettings.Default, SettingsRepository(MemoryStorage()).load())
         with(UserSettings.Default) {
-            assertEquals(AppTheme.LIGHT, theme)
+            assertEquals(AppTheme.CLASSIC, theme)
             assertFalse(highContrast)
             assertEquals(SudokuNumberSize.NORMAL, numberSize)
             assertFalse(reduceAnimations)
@@ -35,7 +35,7 @@ class SettingsRepositoryTest {
     fun changedPreferenceIsSavedAndSurvivesRepositoryRecreation() {
         val storage = MemoryStorage()
         val expected = UserSettings.Default.copy(
-            theme = AppTheme.SYSTEM,
+            theme = AppTheme.OCEAN,
             highContrast = true,
             numberSize = SudokuNumberSize.LARGE,
             reduceAnimations = true,
@@ -53,11 +53,24 @@ class SettingsRepositoryTest {
     }
 
     @Test
-    fun savedDarkThemeIsNotOverwrittenByNewLightDefault() {
+    fun savedThemeIsNotOverwrittenByClassicDefault() {
         val storage = MemoryStorage()
-        SettingsRepository(storage).save(UserSettings.Default.copy(theme = AppTheme.DARK))
+        SettingsRepository(storage).save(UserSettings.Default.copy(theme = AppTheme.NIGHT))
 
-        assertEquals(AppTheme.DARK, SettingsRepository(storage).load().theme)
+        assertEquals(AppTheme.NIGHT, SettingsRepository(storage).load().theme)
+    }
+
+    @Test
+    fun legacyLightDarkAndSystemValuesMigrateSafely() {
+        fun migrated(value: String): AppTheme {
+            val storage = MemoryStorage()
+            storage.replace(emptySet(), mapOf("settings.theme" to value))
+            return SettingsRepository(storage).load().theme
+        }
+
+        assertEquals(AppTheme.CLASSIC, migrated("LIGHT"))
+        assertEquals(AppTheme.NIGHT, migrated("DARK"))
+        assertEquals(AppTheme.CLASSIC, migrated("SYSTEM"))
     }
 
     @Test
@@ -80,7 +93,7 @@ class SettingsRepositoryTest {
         settingsRepository.save(UserSettings.Default.copy(highContrast = true, soundEnabled = false))
 
         assertEquals(UserSettings.Default, settingsRepository.reset())
-        assertEquals(AppTheme.LIGHT, settingsRepository.load().theme)
+        assertEquals(AppTheme.CLASSIC, settingsRepository.load().theme)
         assertEquals(progress, stateRepository.loadProgress())
         assertEquals(game.gameId, stateRepository.loadActiveGame()?.gameId)
         assertEquals(game.notes, stateRepository.loadActiveGame()?.notes)

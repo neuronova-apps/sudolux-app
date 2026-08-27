@@ -114,7 +114,10 @@ class MainActivity : ComponentActivity() {
                         SudoluxAppScreen.SETTINGS -> {
                             SudoluxSettingsScreen(
                                 settings = settings,
-                                onThemeChange = settingsViewModel::setTheme,
+                                playerProgress = playerProgress,
+                                onThemeChange = { theme ->
+                                    settingsViewModel.setTheme(theme, playerProgress)
+                                },
                                 onHighContrastChange = settingsViewModel::setHighContrast,
                                 onNumberSizeChange = settingsViewModel::setNumberSize,
                                 onReduceAnimationsChange = settingsViewModel::setReduceAnimations,

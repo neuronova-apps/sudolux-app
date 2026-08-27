@@ -7,7 +7,7 @@ import com.example.sudoluxapp.domain.settings.UserSettings
 /** Persistencia exclusiva de preferencias; nunca escribe progreso ni partida activa. */
 class SettingsRepository(private val storage: KeyValueStorage) {
     fun load(): UserSettings = UserSettings(
-        theme = enumValueOrDefault(storage.get(THEME), AppTheme.LIGHT),
+        theme = themeValueOrDefault(storage.get(THEME)),
         highContrast = booleanValueOrDefault(storage.get(HIGH_CONTRAST), false),
         numberSize = enumValueOrDefault(storage.get(NUMBER_SIZE), SudokuNumberSize.NORMAL),
         reduceAnimations = booleanValueOrDefault(storage.get(REDUCE_ANIMATIONS), false),
@@ -41,6 +41,13 @@ class SettingsRepository(private val storage: KeyValueStorage) {
 
     private inline fun <reified T : Enum<T>> enumValueOrDefault(value: String?, default: T): T =
         enumValues<T>().firstOrNull { it.name == value } ?: default
+
+    private fun themeValueOrDefault(value: String?): AppTheme = when (value) {
+        "LIGHT" -> AppTheme.CLASSIC
+        "DARK" -> AppTheme.NIGHT
+        "SYSTEM" -> AppTheme.CLASSIC
+        else -> enumValueOrDefault(value, AppTheme.CLASSIC)
+    }
 
     private fun booleanValueOrDefault(value: String?, default: Boolean): Boolean = when (value) {
         "true" -> true

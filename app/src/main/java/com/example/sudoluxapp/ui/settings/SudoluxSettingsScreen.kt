@@ -2,7 +2,10 @@ package com.example.sudoluxapp.ui.settings
 
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
@@ -40,6 +43,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
@@ -51,13 +57,17 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.sudoluxapp.R
+import com.example.sudoluxapp.domain.progression.PlayerProgress
 import com.example.sudoluxapp.domain.settings.AppTheme
 import com.example.sudoluxapp.domain.settings.SudokuNumberSize
 import com.example.sudoluxapp.domain.settings.UserSettings
+import com.example.sudoluxapp.ui.theme.SudoluxThemeCatalog
+import com.example.sudoluxapp.ui.theme.SudoluxThemeConfig
 
 @Composable
 fun SudoluxSettingsScreen(
     settings: UserSettings,
+    playerProgress: PlayerProgress,
     onThemeChange: (AppTheme) -> Unit,
     onHighContrastChange: (Boolean) -> Unit,
     onNumberSizeChange: (SudokuNumberSize) -> Unit,
@@ -102,7 +112,7 @@ fun SudoluxSettingsScreen(
                                 modifier = Modifier.weight(1f),
                                 verticalArrangement = Arrangement.spacedBy(16.dp)
                             ) {
-                                AppearanceSection(settings, onThemeChange)
+                                AppearanceSection(settings, playerProgress, onThemeChange)
                                 AccessibilitySection(
                                     settings,
                                     onHighContrastChange,
@@ -128,7 +138,7 @@ fun SudoluxSettingsScreen(
                         }
                     }
                 } else {
-                    item { AppearanceSection(settings, onThemeChange) }
+                    item { AppearanceSection(settings, playerProgress, onThemeChange) }
                     item {
                         AccessibilitySection(
                             settings,
@@ -216,15 +226,150 @@ private fun SettingsHeader(onBack: () -> Unit) {
 }
 
 @Composable
-private fun AppearanceSection(settings: UserSettings, onThemeChange: (AppTheme) -> Unit) {
+private fun AppearanceSection(
+    settings: UserSettings,
+    playerProgress: PlayerProgress,
+    onThemeChange: (AppTheme) -> Unit
+) {
     SettingsCard("Apariencia") {
-        SettingLabel("Tema", "Elige el aspecto general de la aplicación")
-        ChoiceRow(
-            values = AppTheme.entries,
+        SettingLabel("Tema de la app", "Elige un tema disponible según tu progreso")
+        ThemePicker(
             selected = settings.theme,
-            label = AppTheme::displayName,
+            playerProgress = playerProgress,
             onSelected = onThemeChange
         )
+    }
+}
+
+@Composable
+private fun ThemePicker(
+    selected: AppTheme,
+    playerProgress: PlayerProgress,
+    onSelected: (AppTheme) -> Unit
+) {
+    Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+        SudoluxThemeCatalog.all.chunked(2).forEach { rowThemes ->
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(10.dp)
+            ) {
+                rowThemes.forEach { config ->
+                    ThemeOptionCard(
+                        config = config,
+                        selected = config.theme == selected,
+                        unlocked = config.theme.isUnlocked(playerProgress),
+                        onSelected = { onSelected(config.theme) },
+                        modifier = Modifier.weight(1f)
+                    )
+                }
+                if (rowThemes.size == 1) Spacer(Modifier.weight(1f))
+            }
+        }
+    }
+}
+
+@Composable
+private fun ThemeOptionCard(
+    config: SudoluxThemeConfig,
+    selected: Boolean,
+    unlocked: Boolean,
+    onSelected: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val state = when {
+        !unlocked -> "Bloqueado. ${config.theme.unlockDescription}"
+        selected -> "Tema activo"
+        else -> "Disponible"
+    }
+    Surface(
+        onClick = onSelected,
+        enabled = unlocked,
+        modifier = modifier.semantics {
+            this.selected = selected
+            role = Role.RadioButton
+            contentDescription = config.theme.displayName
+            stateDescription = state
+        },
+        shape = RoundedCornerShape(16.dp),
+        color = if (selected) {
+            MaterialTheme.colorScheme.primaryContainer
+        } else {
+            MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.65f)
+        },
+        border = BorderStroke(
+            if (selected) 2.dp else 1.dp,
+            if (selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outlineVariant
+        )
+    ) {
+        Column(
+            modifier = Modifier.padding(8.dp),
+            verticalArrangement = Arrangement.spacedBy(7.dp)
+        ) {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .aspectRatio(1.6f)
+                    .clip(RoundedCornerShape(11.dp))
+                    .background(config.previewBackground),
+                contentAlignment = Alignment.Center
+            ) {
+                val drawables = config.drawables
+                if (drawables != null) {
+                    Image(
+                        painter = painterResource(drawables.thumbnail),
+                        contentDescription = null,
+                        modifier = Modifier.fillMaxSize(),
+                        contentScale = ContentScale.Crop
+                    )
+                } else {
+                    Text(
+                        text = if (config.theme == AppTheme.CLASSIC) "S" else "S✦",
+                        color = config.previewForeground,
+                        fontSize = 30.sp,
+                        fontWeight = FontWeight.ExtraBold
+                    )
+                }
+                when {
+                    !unlocked && drawables != null -> {
+                        Box(Modifier.fillMaxSize().background(Color.Black.copy(alpha = 0.28f)))
+                        Image(
+                            painter = painterResource(drawables.locked),
+                            contentDescription = null,
+                            modifier = Modifier.size(44.dp)
+                        )
+                    }
+                    selected && drawables != null -> {
+                        Image(
+                            painter = painterResource(drawables.active),
+                            contentDescription = null,
+                            modifier = Modifier
+                                .align(Alignment.TopEnd)
+                                .padding(6.dp)
+                                .size(34.dp)
+                        )
+                    }
+                }
+            }
+            Text(
+                text = config.theme.displayName,
+                fontWeight = if (selected) FontWeight.ExtraBold else FontWeight.Bold,
+                fontSize = 13.sp
+            )
+            Text(
+                text = config.theme.unlockDescription,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                fontSize = 11.sp,
+                lineHeight = 14.sp
+            )
+            if (selected && config.drawables == null) {
+                Text(
+                    text = "✓ Activo",
+                    color = MaterialTheme.colorScheme.primary,
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 11.sp
+                )
+            }
+        }
     }
 }
 
