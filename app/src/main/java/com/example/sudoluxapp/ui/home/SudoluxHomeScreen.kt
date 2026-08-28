@@ -69,6 +69,7 @@ import com.example.sudoluxapp.domain.progression.GameMode
 import com.example.sudoluxapp.domain.progression.PlayerProgress
 import com.example.sudoluxapp.domain.progression.XpCalculator
 import com.example.sudoluxapp.domain.sudoku.SudokuDifficulty
+import com.example.sudoluxapp.ui.components.PlayerLevelFrame
 import com.example.sudoluxapp.ui.game.SudokuGameState
 import com.example.sudoluxapp.ui.navigation.SudoluxBottomBar
 import com.example.sudoluxapp.ui.navigation.SudoluxDestination
@@ -371,23 +372,11 @@ private fun PlayerProgressCard(progress: PlayerProgress) {
             }
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
-            Box(
-                modifier = Modifier
-                    .size(48.dp)
-                    .background(Primary.copy(alpha = 0.13f), CircleShape)
-                    .border(1.dp, Primary.copy(alpha = 0.55f), CircleShape),
-                contentAlignment = Alignment.Center
-            ) {
-                Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    Text("NIVEL", color = MutedText, fontSize = 8.sp, fontWeight = FontWeight.Bold)
-                    Text(
-                        level.level.toString(),
-                        color = Primary,
-                        fontSize = 20.sp,
-                        fontWeight = FontWeight.Black
-                    )
-                }
-            }
+            PlayerLevelFrame(
+                frame = progress.currentProfileFrame,
+                level = level.level,
+                size = 64.dp
+            )
             Spacer(Modifier.width(11.dp))
             Column(modifier = Modifier.weight(1f)) {
                 Text(level.title, fontSize = 19.sp, fontWeight = FontWeight.ExtraBold)

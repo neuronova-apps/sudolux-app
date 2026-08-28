@@ -104,6 +104,52 @@ class ProgressionCalculatorTest {
     }
 
     @Test
+    fun eachCompletedDifficultyAwardsItsSingleFixedMedal() {
+        val expected = mapOf(
+            SudokuDifficulty.EASY to Medal.BRONZE,
+            SudokuDifficulty.MEDIUM to Medal.SILVER,
+            SudokuDifficulty.HARD to Medal.GOLD,
+            SudokuDifficulty.EXPERT to Medal.PLATINUM,
+            SudokuDifficulty.MASTER to Medal.DIAMOND
+        )
+
+        expected.forEach { (difficulty, medal) ->
+            val result = ProgressionCalculator.result(
+                performance(
+                    difficulty = difficulty,
+                    mode = GameMode.WITH_HINTS,
+                    hints = 1,
+                    errors = 1
+                )
+            )
+            val update = ProgressionCalculator.applyResult(
+                PlayerProgress(),
+                "fixed-${difficulty.name}",
+                result
+            )
+
+            assertEquals(medal, result.medal)
+            assertEquals(1, update.progress.completedSudokus)
+            Medal.entries.forEach { candidate ->
+                assertEquals(if (candidate == medal) 1 else 0, update.progress.medalCount(candidate))
+            }
+        }
+    }
+
+    @Test
+    fun perfectMasterAwardsLegendWithoutAddingDiamond() {
+        val result = ProgressionCalculator.result(
+            performance(SudokuDifficulty.MASTER, GameMode.NO_HINTS, errors = 0)
+        )
+        val update = ProgressionCalculator.applyResult(PlayerProgress(), "perfect-master", result)
+
+        assertEquals(Medal.LEGEND, result.medal)
+        assertEquals(1, update.progress.medalCount(Medal.LEGEND))
+        assertEquals(0, update.progress.medalCount(Medal.DIAMOND))
+        assertEquals(1, update.progress.completedSudokus)
+    }
+
+    @Test
     fun playerLevelUsesProgressiveFormulaAndStopsAt100() {
         assertEquals(135, PlayerLevelCalculator.xpRequiredForNextLevel(1))
         assertEquals(450, PlayerLevelCalculator.xpRequiredForNextLevel(10))
@@ -129,7 +175,7 @@ class ProgressionCalculatorTest {
         )
         assertFalse(UnlockableCatalog.levelRewards.first { it.id == "profile_frame" }.isUnlocked(levelProgress))
 
-        val masteryProgress = PlayerProgress(absoluteMasteryCount = 10)
+        val masteryProgress = PlayerProgress(medalCounts = mapOf(Medal.LEGEND to 10))
         assertTrue(UnlockableCatalog.achievementRewards.first { it.id == "exclusive_board" }.isUnlocked(masteryProgress))
         assertFalse(
             UnlockableCatalog.achievementRewards
@@ -151,8 +197,7 @@ class ProgressionCalculatorTest {
 
         val fifth = ProgressionCalculator.applyResult(
             PlayerProgress(
-                medalCounts = mapOf(Medal.LEGEND to 4),
-                absoluteMasteryCount = 4
+                medalCounts = mapOf(Medal.LEGEND to 4)
             ),
             "mastery-5",
             result
@@ -160,6 +205,41 @@ class ProgressionCalculatorTest {
         assertFalse(fifth.newAbsoluteMasteryAchievement)
         assertEquals(listOf(5), fifth.reachedAbsoluteMasteryMilestones)
         assertTrue(fifth.newlyUnlocked.any { it.id == "special_master_background" })
+    }
+
+    @Test
+    fun everyAbsoluteMasteryMilestoneComesDirectlyFromLegendMedals() {
+        val legendResult = ProgressionCalculator.result(
+            performance(SudokuDifficulty.MASTER, GameMode.NO_HINTS, errors = 0)
+        )
+
+        ProgressionCalculator.absoluteMasteryMilestones.forEach { milestone ->
+            val before = PlayerProgress(
+                medalCounts = mapOf(Medal.LEGEND to milestone - 1)
+            )
+            val update = ProgressionCalculator.applyResult(
+                before,
+                "mastery-$milestone",
+                legendResult
+            )
+
+            assertEquals(milestone, update.progress.legendMedalCount)
+            assertEquals(milestone, update.progress.absoluteMasteryCount)
+            assertEquals(listOf(milestone), update.reachedAbsoluteMasteryMilestones)
+        }
+    }
+
+    @Test
+    fun medalCountsAreCumulativeWithoutAnArtificialMaximum() {
+        val bronzeResult = ProgressionCalculator.result(
+            performance(SudokuDifficulty.EASY, GameMode.WITH_HINTS, hints = 1, errors = 1)
+        )
+        val progress = (1..150).fold(PlayerProgress()) { current, gameNumber ->
+            ProgressionCalculator.applyResult(current, "bronze-$gameNumber", bronzeResult).progress
+        }
+
+        assertEquals(150, progress.medalCount(Medal.BRONZE))
+        assertEquals(150, progress.completedSudokus)
     }
 
     private fun xp(

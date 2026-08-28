@@ -1,8 +1,11 @@
 package com.example.sudoluxapp.ui.progress
 
 import com.example.sudoluxapp.domain.progression.Medal
+import com.example.sudoluxapp.domain.progression.AchievementBadge
+import com.example.sudoluxapp.domain.progression.BoardStyle
 import com.example.sudoluxapp.domain.progression.PlayerLevelCalculator
 import com.example.sudoluxapp.domain.progression.PlayerProgress
+import com.example.sudoluxapp.domain.progression.ProfileFrame
 import com.example.sudoluxapp.domain.progression.CompletedGameRecord
 import com.example.sudoluxapp.domain.sudoku.SudokuDifficulty
 import org.junit.Assert.assertEquals
@@ -24,6 +27,9 @@ class ProgressScreenPresenterTest {
         assertEquals(135, state.level.xpRemaining)
         assertEquals(0f, state.level.fraction)
         assertFalse(state.level.isMaximum)
+        assertEquals(ProfileFrame.INITIAL, state.level.profileFrame)
+        assertEquals(AchievementBadge.entries, state.pendingBadges.map { it.badge })
+        assertTrue(state.earnedBadges.isEmpty())
     }
 
     @Test
@@ -46,12 +52,64 @@ class ProgressScreenPresenterTest {
         assertEquals(Medal.entries.size, state.medals.size)
         state.medals.forEach { medal ->
             assertEquals(counts.getValue(medal.medal), medal.count)
+            assertTrue(medal.isEarned)
+            assertEquals(1f, medal.iconAlpha)
+        }
+    }
+
+    @Test
+    fun everyMedalIsDimmedAtZeroAndActiveFromItsOwnFirstUnit() {
+        val emptyState = ProgressScreenPresenter.present(PlayerProgress())
+
+        assertEquals(Medal.entries, emptyState.medals.map { it.medal })
+        emptyState.medals.forEach { medal ->
+            assertEquals(0, medal.count)
+            assertFalse(medal.isEarned)
+            assertEquals(0.3f, medal.iconAlpha)
+        }
+
+        Medal.entries.forEach { earnedMedal ->
+            val state = ProgressScreenPresenter.present(
+                PlayerProgress(medalCounts = mapOf(earnedMedal to 1))
+            )
+
+            state.medals.forEach { medal ->
+                if (medal.medal == earnedMedal) {
+                    assertEquals(1, medal.count)
+                    assertTrue(medal.isEarned)
+                    assertEquals(1f, medal.iconAlpha)
+                } else {
+                    assertEquals(0, medal.count)
+                    assertFalse(medal.isEarned)
+                    assertEquals(0.3f, medal.iconAlpha)
+                }
+            }
+        }
+    }
+
+    @Test
+    fun medalCountersAreIndependentAndHaveNoPresentationLimit() {
+        val counts = mapOf(
+            Medal.BRONZE to 3,
+            Medal.SILVER to 0,
+            Medal.GOLD to 0,
+            Medal.PLATINUM to 17,
+            Medal.DIAMOND to 0,
+            Medal.LEGEND to 42
+        )
+        val state = ProgressScreenPresenter.present(PlayerProgress(medalCounts = counts))
+
+        state.medals.forEach { medal ->
+            assertEquals(counts.getValue(medal.medal), medal.count)
+            assertEquals(medal.count > 0, medal.isEarned)
         }
     }
 
     @Test
     fun absoluteMasteryShowsCountAndReachedMilestones() {
-        val state = ProgressScreenPresenter.present(PlayerProgress(absoluteMasteryCount = 7))
+        val state = ProgressScreenPresenter.present(
+            PlayerProgress(medalCounts = mapOf(Medal.LEGEND to 7))
+        )
 
         assertEquals(7, state.absoluteMasteryCount)
         assertEquals(listOf(1, 5, 10, 25), state.masteryMilestones.map { it.target })
@@ -70,18 +128,23 @@ class ProgressScreenPresenterTest {
     }
 
     @Test
-    fun nearestPendingUnlockIsCalculatedFromCurrentRequirements() {
-        val newPlayer = ProgressScreenPresenter.present(PlayerProgress())
-        val nearMastery = ProgressScreenPresenter.present(
+    fun pendingAndEarnedBadgesAreDerivedAsDisjointSets() {
+        val state = ProgressScreenPresenter.present(
             PlayerProgress(
-                totalXp = xpToReach(3),
-                unlockedIds = setOf("background_1"),
-                absoluteMasteryCount = 4
+                totalXp = xpToReach(15),
+                medalCounts = mapOf(Medal.BRONZE to 1)
             )
         )
 
-        assertEquals("background_1", newPlayer.nextUnlock?.id)
-        assertEquals("special_master_background", nearMastery.nextUnlock?.id)
+        assertTrue(state.earnedBadges.any { it.badge == AchievementBadge.FIRST_STEP })
+        assertTrue(state.earnedBadges.any { it.badge == AchievementBadge.ASCENT })
+        assertFalse(state.pendingBadges.any { it.badge == AchievementBadge.FIRST_STEP })
+        assertFalse(state.pendingBadges.any { it.badge == AchievementBadge.ASCENT })
+        assertTrue(state.pendingBadges.any { it.badge == AchievementBadge.ADVANCED })
+        assertTrue(
+            state.pendingBadges.map { it.badge }.intersect(state.earnedBadges.map { it.badge }.toSet())
+                .isEmpty()
+        )
     }
 
     @Test
@@ -96,20 +159,25 @@ class ProgressScreenPresenterTest {
         assertNull(state.level.xpForNextLevel)
         assertEquals(0, state.level.xpRemaining)
         assertEquals(1f, state.level.fraction)
+        assertEquals(ProfileFrame.LEGEND, state.level.profileFrame)
     }
 
     @Test
-    fun nextUnlockIsEmptyWhenEveryAvailableUnlockIsObtained() {
+    fun pendingBadgesAreEmptyWhenEveryAchievementIsObtained() {
         val state = ProgressScreenPresenter.present(
             PlayerProgress(
                 totalXp = xpToReach(PlayerLevelCalculator.MAX_LEVEL),
-                medalCounts = mapOf(Medal.LEGEND to 1),
-                absoluteMasteryCount = 25
+                medalCounts = mapOf(
+                    Medal.GOLD to 1,
+                    Medal.DIAMOND to 1,
+                    Medal.LEGEND to 25
+                )
             )
         )
 
         assertTrue(state.locked.isEmpty())
-        assertNull(state.nextUnlock)
+        assertTrue(state.pendingBadges.isEmpty())
+        assertEquals(AchievementBadge.entries, state.earnedBadges.map { it.badge })
     }
 
     @Test
@@ -131,6 +199,56 @@ class ProgressScreenPresenterTest {
         assertEquals(2, easy.total)
         assertEquals(4, statistics.totalCompleted)
         assertEquals(2, statistics.historicalUnclassified)
+    }
+
+    @Test
+    fun achievementSectionsContainOnlyRewardsThatBelongInEachSection() {
+        val progress = PlayerProgress(
+            totalXp = xpToReach(30),
+            medalCounts = mapOf(
+                Medal.BRONZE to 1,
+                Medal.GOLD to 1,
+                Medal.DIAMOND to 1,
+                Medal.LEGEND to 1
+            ),
+            selectedBoardStyle = com.example.sudoluxapp.domain.progression.BoardStyle.ADVANCED
+        )
+
+        val state = ProgressScreenPresenter.present(progress)
+
+        assertEquals(
+            listOf(
+                "Predeterminado del tema",
+                "Tablero alternativo",
+                "Tablero avanzado",
+                "Tablero experto",
+                "Tablero Gran maestro",
+                "Tablero exclusivo"
+            ),
+            state.boardStyles.map { it.name }
+        )
+        assertEquals(BoardStyle.entries, state.boardStyles.map { it.style })
+        assertTrue(state.boardStyles.single { it.style == BoardStyle.DEFAULT }.isUnlocked)
+        assertTrue(state.boardStyles.single { it.style == BoardStyle.ADVANCED }.isUnlocked)
+        assertFalse(state.boardStyles.single { it.style == BoardStyle.EXPERT }.isUnlocked)
+        assertFalse(state.boardStyles.single { it.style == BoardStyle.EXCLUSIVE }.isUnlocked)
+        assertTrue(state.boardStyles.single { it.name == "Tablero avanzado" }.isSelected)
+        assertEquals(
+            listOf("Marco inicial", "Marco avanzado I", "Marco avanzado II"),
+            state.profileFrames.map { it.name }
+        )
+        assertTrue(state.profileFrames.single { it.name == "Marco avanzado II" }.isCurrent)
+        assertTrue(state.earnedBadges.any { it.name == "Primer paso" })
+        assertTrue(state.earnedBadges.any { it.name == "Desafío superado" })
+        assertTrue(state.earnedBadges.any { it.name == "Maestro" })
+        assertTrue(state.earnedBadges.any { it.name == "Primera Leyenda" })
+        assertFalse(state.upcomingUnlocks.any { it.name == "Marco avanzado II" })
+        assertFalse(state.upcomingUnlocks.any { it.name == "Tablero avanzado" })
+        assertFalse(state.upcomingUnlocks.any { it.name == "Primera Leyenda" })
+        assertFalse(state.upcomingUnlocks.any { it.name == "Maestría absoluta ×1" })
+        assertFalse(state.upcomingUnlocks.any { upcoming ->
+            AchievementBadge.entries.any { it.displayName == upcoming.name }
+        })
     }
 
     private fun xpToReach(level: Int): Int =

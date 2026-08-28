@@ -90,8 +90,9 @@ class SettingsRepositoryTest {
         val stateRepository = SudoluxRepository(storage)
         val progress = PlayerProgress(
             totalXp = 840,
-            medalCounts = Medal.entries.associateWith { 2 },
-            absoluteMasteryCount = 3,
+            medalCounts = Medal.entries.associateWith { medal ->
+                if (medal == Medal.LEGEND) 3 else 2
+            },
             unlockedIds = setOf("background_1")
         )
         val game = SudokuGameState(SudokuTestFixtures.puzzle, gameId = "still-active")

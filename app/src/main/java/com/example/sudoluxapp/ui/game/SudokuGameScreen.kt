@@ -55,6 +55,7 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.semantics.Role
@@ -70,6 +71,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.sudoluxapp.R
 import com.example.sudoluxapp.domain.progression.ExtraHintConfirmation
+import com.example.sudoluxapp.domain.progression.BoardStyle
 import com.example.sudoluxapp.domain.progression.GameMode
 import com.example.sudoluxapp.domain.progression.GameResult
 import com.example.sudoluxapp.domain.progression.PlayerProgress
@@ -79,6 +81,7 @@ import com.example.sudoluxapp.domain.sudoku.SudokuDifficulty
 import com.example.sudoluxapp.domain.premium.AccessTier
 import com.example.sudoluxapp.domain.settings.SudokuNumberSize
 import com.example.sudoluxapp.domain.settings.UserSettings
+import com.example.sudoluxapp.ui.components.drawableResOrNull
 import com.example.sudoluxapp.ui.theme.SudoluxAppTheme
 import com.example.sudoluxapp.ui.theme.LocalSudoluxThemeConfig
 import com.example.sudoluxapp.ui.theme.forDifficulty
@@ -109,6 +112,7 @@ fun SudokuGameScreen(
     settings: UserSettings,
     onProgress: () -> Unit,
     onBack: () -> Unit,
+    boardStyle: BoardStyle = BoardStyle.DEFAULT,
     modifier: Modifier = Modifier
 ) {
     val requestedDifficulty = SudokuDifficulty.fromDisplayName(difficulty)
@@ -220,6 +224,7 @@ fun SudokuGameScreen(
                     difficulty = difficulty,
                     game = activeGame,
                     settings = settings,
+                    boardStyle = boardStyle,
                     isLandscape = isLandscape,
                     onBack = onBack,
                     onCellSelected = onCellSelected,
@@ -284,6 +289,7 @@ private fun GameContent(
     difficulty: String,
     game: SudokuGameState,
     settings: UserSettings,
+    boardStyle: BoardStyle,
     isLandscape: Boolean,
     onBack: () -> Unit,
     onCellSelected: (Int) -> Unit,
@@ -307,6 +313,7 @@ private fun GameContent(
                 SudokuBoard(
                     game = game,
                     settings = settings,
+                    boardStyle = boardStyle,
                     onCellSelected = onCellSelected,
                     modifier = Modifier.size(boardSize)
                 )
@@ -334,6 +341,7 @@ private fun GameContent(
             SudokuBoard(
                 game = game,
                 settings = settings,
+                boardStyle = boardStyle,
                 onCellSelected = onCellSelected,
                 modifier = Modifier.fillMaxWidth().widthIn(max = 430.dp)
             )
@@ -666,6 +674,7 @@ private fun HeaderStat(
 private fun SudokuBoard(
     game: SudokuGameState,
     settings: UserSettings,
+    boardStyle: BoardStyle,
     onCellSelected: (Int) -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -674,14 +683,35 @@ private fun SudokuBoard(
     val thinLine = if (settings.highContrast) MaterialTheme.colorScheme.outline else GameBorderBlue
     val strongLine = if (settings.highContrast) MaterialTheme.colorScheme.onSurface else GamePrimary.copy(alpha = 0.9f)
     val selectionColor = GamePrimary
+    val boardDrawable = boardStyle.drawableResOrNull()
+    val usesSpecialBoard = boardDrawable != null
 
     Box(
         modifier = modifier
             .aspectRatio(1f)
-            .background(GameDeepBlue, RoundedCornerShape(4.dp))
-            .border(if (settings.highContrast) 4.dp else 3.dp, strongLine, RoundedCornerShape(4.dp))
+            .then(
+                if (usesSpecialBoard) {
+                    Modifier
+                } else {
+                    Modifier
+                        .background(GameDeepBlue, RoundedCornerShape(4.dp))
+                        .border(
+                            if (settings.highContrast) 4.dp else 3.dp,
+                            strongLine,
+                            RoundedCornerShape(4.dp)
+                        )
+                }
+            )
             .semantics { contentDescription = "Tablero de Sudoku de 9 filas por 9 columnas" }
     ) {
+        if (boardDrawable != null) {
+            Image(
+                painter = painterResource(boardDrawable),
+                contentDescription = null,
+                modifier = Modifier.fillMaxSize(),
+                contentScale = ContentScale.FillBounds
+            )
+        }
         Column(Modifier.fillMaxSize()) {
             repeat(9) { row ->
                 Row(Modifier.weight(1f)) {
@@ -709,6 +739,7 @@ private fun SudokuBoard(
                             },
                             numberSize = settings.numberSize,
                             highContrast = settings.highContrast,
+                            usesSpecialBoard = usesSpecialBoard,
                             onClick = { onCellSelected(index) },
                             modifier = Modifier
                                 .weight(1f)
@@ -720,18 +751,20 @@ private fun SudokuBoard(
         }
         Canvas(Modifier.fillMaxSize()) {
             val cell = size.width / 9f
-            for (line in 0..9) {
-                val coordinate = line * cell
-                val strong = line % 3 == 0
-                val stroke = when {
-                    settings.highContrast && strong -> 4.dp.toPx()
-                    settings.highContrast -> 1.5.dp.toPx()
-                    strong -> 3.dp.toPx()
-                    else -> 1.dp.toPx()
+            if (!usesSpecialBoard) {
+                for (line in 0..9) {
+                    val coordinate = line * cell
+                    val strong = line % 3 == 0
+                    val stroke = when {
+                        settings.highContrast && strong -> 4.dp.toPx()
+                        settings.highContrast -> 1.5.dp.toPx()
+                        strong -> 3.dp.toPx()
+                        else -> 1.dp.toPx()
+                    }
+                    val color = if (strong) strongLine else thinLine
+                    drawLine(color, start = androidx.compose.ui.geometry.Offset(coordinate, 0f), end = androidx.compose.ui.geometry.Offset(coordinate, size.height), strokeWidth = stroke)
+                    drawLine(color, start = androidx.compose.ui.geometry.Offset(0f, coordinate), end = androidx.compose.ui.geometry.Offset(size.width, coordinate), strokeWidth = stroke)
                 }
-                val color = if (strong) strongLine else thinLine
-                drawLine(color, start = androidx.compose.ui.geometry.Offset(coordinate, 0f), end = androidx.compose.ui.geometry.Offset(coordinate, size.height), strokeWidth = stroke)
-                drawLine(color, start = androidx.compose.ui.geometry.Offset(0f, coordinate), end = androidx.compose.ui.geometry.Offset(size.width, coordinate), strokeWidth = stroke)
             }
             selectedIndex?.let { index ->
                 val selectionStroke = (if (settings.highContrast) 5.dp else 3.dp).toPx()
@@ -767,13 +800,16 @@ private fun SudokuCell(
     highlightedCandidate: Int?,
     numberSize: SudokuNumberSize,
     highContrast: Boolean,
+    usesSpecialBoard: Boolean,
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     val background = when {
         isSelected -> GamePrimary.copy(alpha = 0.28f)
         isSameNumber -> GamePrimary.copy(alpha = 0.20f)
+        isRelated && usesSpecialBoard -> GameElevatedBlue.copy(alpha = 0.45f)
         isRelated -> GameElevatedBlue
+        usesSpecialBoard -> Color.Transparent
         else -> GameDeepBlue
     }
     val row = index / 9 + 1

@@ -3,6 +3,7 @@ package com.example.sudoluxapp.data
 import android.content.Context
 import android.content.SharedPreferences
 import androidx.core.content.edit
+import com.example.sudoluxapp.domain.progression.BoardStyle
 import com.example.sudoluxapp.domain.progression.CompletedGameRecord
 import com.example.sudoluxapp.domain.progression.GameCompletionStatus
 import com.example.sudoluxapp.domain.progression.GameMode
@@ -41,24 +42,31 @@ class SharedPreferencesKeyValueStorage(context: Context) : KeyValueStorage {
 class SudoluxRepository(private val storage: KeyValueStorage) {
     fun loadProgress(): PlayerProgress {
         val totalXp = storage.get(PROGRESS_XP)?.toIntOrNull()?.coerceAtLeast(0) ?: 0
-        val mastery = storage.get(PROGRESS_MASTERY)?.toIntOrNull()?.coerceAtLeast(0) ?: 0
-        val medals = Medal.entries.associateWith { medal ->
+        val legacyMastery = storage.get(PROGRESS_MASTERY)?.toIntOrNull()?.coerceAtLeast(0) ?: 0
+        val storedMedals = Medal.entries.associateWith { medal ->
             storage.get("$PROGRESS_MEDAL_PREFIX${medal.name}")?.toIntOrNull()?.coerceAtLeast(0) ?: 0
         }
-        return PlayerProgress(
+        val medals = storedMedals + (
+            Medal.LEGEND to maxOf(storedMedals.getValue(Medal.LEGEND), legacyMastery)
+        )
+        val baseProgress = PlayerProgress(
             totalXp = totalXp,
             medalCounts = medals,
-            absoluteMasteryCount = mastery,
             unlockedIds = decodeSet(storage.get(PROGRESS_UNLOCKS)),
             processedGameIds = decodeSet(storage.get(PROGRESS_PROCESSED_GAMES)),
             completedGameRecords = decodeCompletedGames(storage.get(PROGRESS_COMPLETED_GAMES))
         )
+        val selectedBoardStyle = storage.get(PROGRESS_SELECTED_BOARD_STYLE)
+            ?.let { persisted -> runCatching { BoardStyle.valueOf(persisted) }.getOrNull() }
+            ?.takeIf { it.isUnlocked(baseProgress) }
+            ?: BoardStyle.DEFAULT
+        return baseProgress.copy(selectedBoardStyle = selectedBoardStyle)
     }
 
     fun saveProgress(progress: PlayerProgress) {
         val values = buildMap {
             put(PROGRESS_XP, progress.totalXp.toString())
-            put(PROGRESS_MASTERY, progress.absoluteMasteryCount.toString())
+            put(PROGRESS_SELECTED_BOARD_STYLE, progress.selectedBoardStyle.name)
             put(PROGRESS_UNLOCKS, encodeSet(progress.unlockedIds))
             put(PROGRESS_PROCESSED_GAMES, encodeSet(progress.processedGameIds))
             put(PROGRESS_COMPLETED_GAMES, encodeCompletedGames(progress.completedGameRecords))
@@ -66,7 +74,7 @@ class SudoluxRepository(private val storage: KeyValueStorage) {
                 put("$PROGRESS_MEDAL_PREFIX${medal.name}", progress.medalCount(medal).toString())
             }
         }
-        storage.replace(emptySet(), values)
+        storage.replace(setOf(PROGRESS_MASTERY), values)
     }
 
     fun loadActiveGame(): SudokuGameState? {
@@ -214,6 +222,7 @@ class SudoluxRepository(private val storage: KeyValueStorage) {
         const val COMPLETED_GAME_FORMAT_VERSION = "1"
         const val PROGRESS_XP = "progress.xp"
         const val PROGRESS_MASTERY = "progress.mastery"
+        const val PROGRESS_SELECTED_BOARD_STYLE = "progress.selected_board_style"
         const val PROGRESS_UNLOCKS = "progress.unlocks"
         const val PROGRESS_PROCESSED_GAMES = "progress.processed_games"
         const val PROGRESS_COMPLETED_GAMES = "progress.completed_games"

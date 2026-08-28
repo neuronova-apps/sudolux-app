@@ -44,14 +44,12 @@ object ProgressionCalculator {
         val beforeUnlocked = (
             current.unlockedIds + UnlockableCatalog.unlocked(current).map { it.id }
         ).toSet()
-        val masteryIncrement = if (result.isAbsoluteMastery) 1 else 0
         val updatedMedals = result.medal?.let { medal ->
             current.medalCounts + (medal to current.medalCount(medal) + 1)
         } ?: current.medalCounts
         val updatedBase = current.copy(
             totalXp = current.totalXp + result.xpEarned,
             medalCounts = updatedMedals,
-            absoluteMasteryCount = current.absoluteMasteryCount + masteryIncrement,
             processedGameIds = current.processedGameIds + gameId,
             completedGameRecords = current.completedGameRecords + (
                 gameId to CompletedGameRecord(
@@ -73,7 +71,8 @@ object ProgressionCalculator {
             progress = updated,
             rewardApplied = true,
             previousLevel = previousLevel,
-            newAbsoluteMasteryAchievement = result.isAbsoluteMastery && current.absoluteMasteryCount == 0,
+            newAbsoluteMasteryAchievement =
+                result.medal == Medal.LEGEND && current.legendMedalCount == 0,
             reachedAbsoluteMasteryMilestones = reachedMilestones,
             newlyUnlocked = availableUnlocks.filterNot { it.id in beforeUnlocked }
         )

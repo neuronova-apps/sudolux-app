@@ -1,10 +1,12 @@
 package com.example.sudoluxapp.ui.progress
 
 import androidx.activity.compose.BackHandler
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
@@ -39,9 +41,12 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.disabled
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.selected
@@ -52,8 +57,14 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.sudoluxapp.R
+import com.example.sudoluxapp.domain.progression.BoardStyle
 import com.example.sudoluxapp.domain.progression.Medal
 import com.example.sudoluxapp.domain.progression.PlayerProgress
+import com.example.sudoluxapp.domain.progression.ProfileFrame
+import com.example.sudoluxapp.ui.components.PlayerLevelFrame
+import com.example.sudoluxapp.ui.components.drawableRes
+import com.example.sudoluxapp.ui.components.drawableResOrNull
+import com.example.sudoluxapp.ui.components.masteryMilestoneDrawableRes
 import com.example.sudoluxapp.ui.navigation.SudoluxBottomBar
 import com.example.sudoluxapp.ui.navigation.SudoluxDestination
 import com.example.sudoluxapp.ui.theme.SudoluxAppTheme
@@ -65,6 +76,7 @@ fun SudoluxProgressScreen(
     onHome: () -> Unit,
     onPlay: () -> Unit,
     onBack: () -> Unit,
+    onBoardStyleSelected: (BoardStyle) -> Unit = { },
     modifier: Modifier = Modifier
 ) {
     BackHandler(onBack = onBack)
@@ -112,7 +124,7 @@ fun SudoluxProgressScreen(
                 when (selectedSection) {
                     ProgressSection.SUMMARY -> {
                         item { LevelCard(uiState.level) }
-                        item { NextUnlockCard(uiState.nextUnlock) }
+                        item { PendingAchievementsSection(uiState.pendingBadges) }
                     }
 
                     ProgressSection.STATISTICS -> {
@@ -120,36 +132,27 @@ fun SudoluxProgressScreen(
                     }
 
                     ProgressSection.ACHIEVEMENTS -> {
+                        item { MedalsSection(uiState.medals) }
                         item {
-                            if (isLandscape) {
-                                Row(
-                                    modifier = Modifier.fillMaxWidth(),
-                                    horizontalArrangement = Arrangement.spacedBy(16.dp),
-                                    verticalAlignment = Alignment.Top
-                                ) {
-                                    MedalsSection(uiState.medals, Modifier.weight(1f))
-                                    MasterySection(
-                                        count = uiState.absoluteMasteryCount,
-                                        milestones = uiState.masteryMilestones,
-                                        modifier = Modifier.weight(1f)
-                                    )
-                                }
-                            } else {
-                                Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
-                                    MedalsSection(uiState.medals)
-                                    MasterySection(
-                                        count = uiState.absoluteMasteryCount,
-                                        milestones = uiState.masteryMilestones
-                                    )
-                                }
-                            }
-                        }
-                        item {
-                            PersonalizationSection(
-                                unlocked = uiState.unlocked,
-                                locked = uiState.locked
+                            MasterySection(
+                                count = uiState.absoluteMasteryCount,
+                                milestones = uiState.masteryMilestones
                             )
                         }
+                        item {
+                            BoardCustomizationSection(
+                                boardStyles = uiState.boardStyles,
+                                onBoardStyleSelected = onBoardStyleSelected
+                            )
+                        }
+                        item {
+                            ProfileFramesSection(
+                                frames = uiState.profileFrames,
+                                currentLevel = uiState.level.level
+                            )
+                        }
+                        item { EarnedBadgesSection(uiState.earnedBadges) }
+                        item { UpcomingUnlocksSection(uiState.upcomingUnlocks) }
                     }
                 }
             }
@@ -270,28 +273,11 @@ private fun LevelCard(level: ProgressLevelUiState) {
             }
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
-            Box(
-                modifier = Modifier
-                    .size(64.dp)
-                    .background(colors.primaryContainer, CircleShape)
-                    .border(1.dp, colors.primary, CircleShape),
-                contentAlignment = Alignment.Center
-            ) {
-                Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    Text(
-                        "NIVEL",
-                        color = colors.onPrimaryContainer,
-                        fontSize = 9.sp,
-                        fontWeight = FontWeight.Bold
-                    )
-                    Text(
-                        level.level.toString(),
-                        color = colors.primary,
-                        fontSize = 25.sp,
-                        fontWeight = FontWeight.Black
-                    )
-                }
-            }
+            PlayerLevelFrame(
+                frame = level.profileFrame,
+                level = level.level,
+                size = 72.dp
+            )
             Spacer(Modifier.width(14.dp))
             Column(modifier = Modifier.weight(1f)) {
                 Text(
@@ -354,38 +340,64 @@ private fun LevelCard(level: ProgressLevelUiState) {
 }
 
 @Composable
-private fun NextUnlockCard(nextUnlock: UnlockableUiState?) {
+private fun PendingAchievementsSection(badges: List<AchievementBadgeUiState>) {
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(18.dp),
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.primaryContainer,
-            contentColor = MaterialTheme.colorScheme.onPrimaryContainer
+            containerColor = MaterialTheme.colorScheme.surface,
+            contentColor = MaterialTheme.colorScheme.onSurface
         ),
-        border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary)
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)
     ) {
         Column(
             modifier = Modifier.padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(4.dp)
+            verticalArrangement = Arrangement.spacedBy(10.dp)
         ) {
             Text(
-                text = "Próximo desbloqueo",
+                text = "Logros por desbloquear",
                 color = MaterialTheme.colorScheme.primary,
                 fontSize = 13.sp,
                 fontWeight = FontWeight.Bold
             )
-            if (nextUnlock == null) {
+            if (badges.isEmpty()) {
                 Text(
-                    text = "Todos los desbloqueos disponibles conseguidos.",
+                    text = "Todos los logros han sido obtenidos.",
                     fontWeight = FontWeight.Bold
                 )
             } else {
-                Text(nextUnlock.name, fontSize = 18.sp, fontWeight = FontWeight.ExtraBold)
-                Text(
-                    text = "${nextUnlock.typeLabel} · ${nextUnlock.requirementLabel}",
-                    color = MaterialTheme.colorScheme.onPrimaryContainer,
-                    fontSize = 14.sp
-                )
+                badges.forEach { badge ->
+                    Surface(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .semantics {
+                                contentDescription = "${badge.name}, ${badge.requirementLabel}, Pendiente"
+                            },
+                        shape = RoundedCornerShape(13.dp),
+                        color = MaterialTheme.colorScheme.surfaceVariant,
+                        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)
+                    ) {
+                        Row(
+                            modifier = Modifier.padding(horizontal = 12.dp, vertical = 10.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Column(modifier = Modifier.weight(1f)) {
+                                Text(badge.name, fontWeight = FontWeight.Bold)
+                                Text(
+                                    badge.requirementLabel,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    fontSize = 12.sp
+                                )
+                            }
+                            Text(
+                                "Pendiente",
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                fontSize = 11.sp,
+                                fontWeight = FontWeight.Bold
+                            )
+                        }
+                    }
+                }
             }
         }
     }
@@ -393,7 +405,7 @@ private fun NextUnlockCard(nextUnlock: UnlockableUiState?) {
 
 @Composable
 private fun MedalsSection(medals: List<MedalUiState>, modifier: Modifier = Modifier) {
-    ProgressSectionCard(title = "Trofeos y medallas", modifier = modifier) {
+    ProgressSectionCard(title = "Medallas", modifier = modifier) {
         medals.chunked(2).forEach { rowMedals ->
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -418,41 +430,38 @@ private fun MedalCard(medal: MedalUiState, modifier: Modifier = Modifier) {
     }
     Surface(
         modifier = modifier
-            .heightIn(min = 76.dp)
+            .heightIn(min = 118.dp)
             .semantics {
-                contentDescription = "Medalla ${medal.medal.displayName}, cantidad ${medal.count}"
+                contentDescription = "Medalla ${medal.medal.displayName}, cantidad ${medal.count}, " +
+                    if (medal.isEarned) "activa" else "atenuada"
             },
         shape = RoundedCornerShape(14.dp),
         color = MaterialTheme.colorScheme.surfaceVariant,
         border = BorderStroke(if (isLegend) 2.dp else 1.dp, accent)
     ) {
-        Row(
-            modifier = Modifier.padding(12.dp),
-            verticalAlignment = Alignment.CenterVertically
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 8.dp, vertical = 10.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Box(
+            Image(
+                painter = painterResource(medal.medal.drawableRes()),
+                contentDescription = null,
                 modifier = Modifier
-                    .size(34.dp)
-                    .background(MaterialTheme.colorScheme.primaryContainer, CircleShape)
-                    .border(1.dp, accent, CircleShape),
-                contentAlignment = Alignment.Center
-            ) {
-                Text(
-                    text = medal.medal.displayName.take(1),
-                    color = accent,
-                    fontWeight = FontWeight.Black
-                )
-            }
-            Spacer(Modifier.width(9.dp))
-            Column {
-                Text(
-                    medal.medal.displayName,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    fontSize = 13.sp,
-                    fontWeight = FontWeight.Bold
-                )
-                Text("×${medal.count}", color = accent, fontSize = 18.sp, fontWeight = FontWeight.ExtraBold)
-            }
+                    .size(62.dp)
+                    .aspectRatio(1f)
+                    .alpha(medal.iconAlpha),
+                contentScale = ContentScale.Fit
+            )
+            Text(
+                medal.medal.displayName,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                fontSize = 13.sp,
+                fontWeight = FontWeight.Bold,
+                maxLines = 1
+            )
+            Text("×${medal.count}", color = accent, fontSize = 18.sp, fontWeight = FontWeight.ExtraBold)
         }
     }
 }
@@ -493,7 +502,7 @@ private fun MasterySection(
                 Surface(
                     modifier = Modifier
                         .weight(1f)
-                        .heightIn(min = 50.dp)
+                        .heightIn(min = 92.dp)
                         .semantics {
                             contentDescription = "Hito por ${milestone.target}, $status"
                         },
@@ -509,9 +518,18 @@ private fun MasterySection(
                     )
                 ) {
                     Column(
-                        modifier = Modifier.padding(vertical = 8.dp, horizontal = 4.dp),
+                        modifier = Modifier.padding(vertical = 7.dp, horizontal = 3.dp),
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
+                        Image(
+                            painter = painterResource(masteryMilestoneDrawableRes(milestone.target)),
+                            contentDescription = null,
+                            modifier = Modifier
+                                .size(56.dp)
+                                .aspectRatio(1f)
+                                .alpha(if (milestone.reached) 1f else 0.3f),
+                            contentScale = ContentScale.Fit
+                        )
                         Text(
                             "×${milestone.target}",
                             color = if (milestone.reached) colors.primary else colors.onSurfaceVariant,
@@ -535,89 +553,305 @@ private fun MasterySection(
 }
 
 @Composable
-private fun PersonalizationSection(
-    unlocked: List<UnlockableUiState>,
-    locked: List<UnlockableUiState>
+private fun BoardCustomizationSection(
+    boardStyles: List<BoardStyleUiState>,
+    onBoardStyleSelected: (BoardStyle) -> Unit
 ) {
-    ProgressSectionCard(title = "Personalización") {
-        UnlockGroup("Desbloqueados", unlocked, true)
-        UnlockGroup("Próximos", locked, false)
+    ProgressSectionCard(title = "Personalización del tablero") {
+        boardStyles.forEach { boardStyle ->
+            if (boardStyle.isUnlocked) {
+                Surface(
+                    onClick = { onBoardStyleSelected(boardStyle.style) },
+                    modifier = boardStyle.modifier(),
+                    shape = RoundedCornerShape(13.dp),
+                    color = boardStyle.containerColor(),
+                    border = boardStyle.borderStroke()
+                ) {
+                    BoardStyleContent(boardStyle)
+                }
+            } else {
+                Surface(
+                    modifier = boardStyle.modifier(),
+                    shape = RoundedCornerShape(13.dp),
+                    color = boardStyle.containerColor(),
+                    border = boardStyle.borderStroke()
+                ) {
+                    BoardStyleContent(boardStyle)
+                }
+            }
+        }
     }
 }
 
+private fun BoardStyleUiState.modifier(): Modifier = Modifier
+    .fillMaxWidth()
+    .semantics {
+        selected = isSelected
+        role = Role.RadioButton
+        contentDescription = "$name, $requirementLabel, " + when {
+            isSelected -> "Seleccionado"
+            isUnlocked -> "Disponible"
+            else -> "Bloqueado"
+        }
+        if (!isUnlocked) disabled()
+    }
+
 @Composable
-private fun UnlockGroup(
-    title: String,
-    unlocks: List<UnlockableUiState>,
-    unlocked: Boolean
-) {
-    Text(
-        text = "$title · ${unlocks.size}",
-        color = if (unlocked) {
-            MaterialTheme.colorScheme.secondary
-        } else {
-            MaterialTheme.colorScheme.onSurfaceVariant
-        },
-        fontSize = 14.sp,
-        fontWeight = FontWeight.Bold
-    )
-    if (unlocks.isEmpty()) {
+private fun BoardStyleUiState.containerColor() = if (isSelected) {
+    MaterialTheme.colorScheme.primaryContainer
+} else {
+    MaterialTheme.colorScheme.surfaceVariant
+}
+
+@Composable
+private fun BoardStyleUiState.borderStroke() = BorderStroke(
+    if (isSelected) 2.dp else 1.dp,
+    if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outlineVariant
+)
+
+@Composable
+private fun BoardStyleContent(boardStyle: BoardStyleUiState) {
+    Row(
+        modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        BoardStylePreview(boardStyle.style, boardStyle.isUnlocked)
+        Spacer(Modifier.width(12.dp))
+        Column(modifier = Modifier.weight(1f)) {
+            Text(boardStyle.name, fontWeight = FontWeight.Bold)
+            Text(
+                boardStyle.requirementLabel,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                fontSize = 12.sp
+            )
+        }
         Text(
-            text = if (unlocked) "Aún no hay desbloqueos obtenidos." else "No quedan desbloqueos pendientes.",
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            fontSize = 13.sp
+            when {
+                boardStyle.isSelected -> "Seleccionado"
+                boardStyle.isUnlocked -> "Elegir"
+                else -> "🔒 Bloqueado"
+            },
+            color = if (boardStyle.isUnlocked) {
+                MaterialTheme.colorScheme.primary
+            } else {
+                MaterialTheme.colorScheme.onSurfaceVariant
+            },
+            fontSize = 11.sp,
+            fontWeight = FontWeight.Bold
         )
-    } else {
-        unlocks.forEach { unlock -> UnlockableRow(unlock) }
     }
 }
 
 @Composable
-private fun UnlockableRow(unlock: UnlockableUiState) {
-    val statusLabel = if (unlock.isUnlocked) "Desbloqueado" else "Bloqueado"
-    val accent = if (unlock.isUnlocked) {
-        MaterialTheme.colorScheme.secondary
-    } else {
-        MaterialTheme.colorScheme.onSurfaceVariant
+private fun ProfileFramesSection(
+    frames: List<ProfileFrameUiState>,
+    currentLevel: Int
+) {
+    ProgressSectionCard(title = "Marcos de perfil") {
+        frames.forEach { frame ->
+            Surface(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .semantics {
+                        contentDescription = "${frame.name}, ${frame.requirementLabel}, " +
+                            if (frame.isCurrent) "Actual" else "Alcanzado"
+                    },
+                shape = RoundedCornerShape(13.dp),
+                color = if (frame.isCurrent) {
+                    MaterialTheme.colorScheme.primaryContainer
+                } else {
+                    MaterialTheme.colorScheme.surfaceVariant
+                },
+                border = BorderStroke(
+                    1.dp,
+                    if (frame.isCurrent) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outlineVariant
+                )
+            ) {
+                Row(
+                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    ProfileFramePreview(
+                        frame = frame.frame,
+                        currentLevel = currentLevel
+                    )
+                    Spacer(Modifier.width(12.dp))
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text(frame.name, fontWeight = FontWeight.Bold)
+                        Text(
+                            frame.requirementLabel,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            fontSize = 12.sp
+                        )
+                    }
+                    Text(
+                        if (frame.isCurrent) "Actual" else "Alcanzado",
+                        color = if (frame.isCurrent) {
+                            MaterialTheme.colorScheme.primary
+                        } else {
+                            MaterialTheme.colorScheme.secondary
+                        },
+                        fontSize = 11.sp,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
+            }
+        }
     }
+}
+
+@Composable
+private fun EarnedBadgesSection(badges: List<AchievementBadgeUiState>) {
+    ProgressSectionCard(title = "Insignias obtenidas") {
+        if (badges.isEmpty()) {
+            Text(
+                "Aún no hay insignias obtenidas.",
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                fontSize = 13.sp
+            )
+        } else {
+            badges.chunked(2).forEach { rowBadges ->
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(10.dp)
+                ) {
+                    rowBadges.forEach { badge ->
+                        EarnedBadgeCard(badge, Modifier.weight(1f))
+                    }
+                    if (rowBadges.size == 1) Spacer(Modifier.weight(1f))
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun UpcomingUnlocksSection(unlocks: List<UpcomingUnlockUiState>) {
+    ProgressSectionCard(title = "Próximos desbloqueos") {
+        if (unlocks.isEmpty()) {
+            Text(
+                "No quedan recompensas pendientes.",
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                fontSize = 13.sp
+            )
+        } else {
+            unlocks.forEach { unlock ->
+                Surface(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .semantics {
+                            contentDescription = "${unlock.name}, ${unlock.typeLabel}, " +
+                                "${unlock.requirementLabel}, Bloqueado"
+                        },
+                    shape = RoundedCornerShape(13.dp),
+                    color = MaterialTheme.colorScheme.surfaceVariant,
+                    border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)
+                ) {
+                    Row(
+                        modifier = Modifier.padding(12.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            "🔒",
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            fontSize = 14.sp
+                        )
+                        Spacer(Modifier.width(10.dp))
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text(unlock.name, fontWeight = FontWeight.Bold)
+                            Text(
+                                "${unlock.typeLabel} · ${unlock.requirementLabel}",
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                fontSize = 12.sp
+                            )
+                        }
+                        Text(
+                            "Bloqueado",
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            fontSize = 11.sp,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun BoardStylePreview(boardStyle: BoardStyle, isUnlocked: Boolean) {
+    val drawableRes = boardStyle.drawableResOrNull()
+    if (drawableRes == null) {
+        Box(
+            modifier = Modifier
+                .size(82.dp)
+                .aspectRatio(1f)
+                .background(MaterialTheme.colorScheme.surface, RoundedCornerShape(12.dp))
+                .border(1.dp, MaterialTheme.colorScheme.primary, RoundedCornerShape(12.dp)),
+            contentAlignment = Alignment.Center
+        ) {
+            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                Text("9×9", color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.Black)
+                Text("Tema", color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 10.sp)
+            }
+        }
+    } else {
+        Image(
+            painter = painterResource(drawableRes),
+            contentDescription = null,
+            modifier = Modifier
+                .size(82.dp)
+                .aspectRatio(1f)
+                .alpha(if (isUnlocked) 1f else 0.32f)
+                .clip(RoundedCornerShape(12.dp)),
+            contentScale = ContentScale.Fit
+        )
+    }
+}
+
+@Composable
+private fun ProfileFramePreview(frame: ProfileFrame, currentLevel: Int) {
+    PlayerLevelFrame(frame = frame, level = currentLevel, size = 82.dp)
+}
+
+@Composable
+private fun EarnedBadgeCard(
+    badge: AchievementBadgeUiState,
+    modifier: Modifier = Modifier
+) {
     Surface(
-        modifier = Modifier
-            .fillMaxWidth()
+        modifier = modifier
+            .heightIn(min = 112.dp)
             .semantics {
-                contentDescription = "${unlock.name}, ${unlock.typeLabel}, " +
-                    "${unlock.requirementLabel}, $statusLabel"
+                contentDescription = "${badge.name}, ${badge.requirementLabel}, Obtenida"
             },
         shape = RoundedCornerShape(13.dp),
         color = MaterialTheme.colorScheme.surfaceVariant,
-        border = BorderStroke(
-            1.dp,
-            if (unlock.isUnlocked) MaterialTheme.colorScheme.secondary else MaterialTheme.colorScheme.outlineVariant
-        )
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.secondary)
     ) {
-        Row(
-            modifier = Modifier.padding(12.dp),
-            verticalAlignment = Alignment.CenterVertically
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 6.dp, vertical = 9.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(4.dp)
         ) {
-            Text(
-                text = if (unlock.isUnlocked) "✓" else "—",
-                color = accent,
-                fontSize = 18.sp,
-                fontWeight = FontWeight.Bold
+            Image(
+                painter = painterResource(badge.badge.drawableRes()),
+                contentDescription = null,
+                modifier = Modifier
+                    .size(62.dp)
+                    .aspectRatio(1f),
+                contentScale = ContentScale.Fit
             )
-            Spacer(Modifier.width(10.dp))
-            Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    unlock.name,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    fontWeight = FontWeight.Bold
-                )
-                Text(
-                    text = "${unlock.typeLabel} · ${unlock.requirementLabel}",
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    fontSize = 12.sp
-                )
-            }
-            Text(statusLabel, color = accent, fontSize = 11.sp, fontWeight = FontWeight.Bold)
+            Text(
+                badge.name,
+                color = MaterialTheme.colorScheme.onSurface,
+                fontSize = 12.sp,
+                lineHeight = 14.sp,
+                fontWeight = FontWeight.Bold,
+                textAlign = TextAlign.Center
+            )
         }
     }
 }

@@ -71,6 +71,7 @@ class MainActivity : ComponentActivity() {
                                 onGameChange = appViewModel::updateGame,
                                 onGameCompleted = appViewModel::applyResult,
                                 settings = settings,
+                                boardStyle = playerProgress.selectedBoardStyle,
                                 onProgress = { currentScreen = SudoluxAppScreen.PROGRESS },
                                 onBack = { currentScreen = SudoluxAppScreen.HOME }
                             )
@@ -84,6 +85,7 @@ class MainActivity : ComponentActivity() {
                                     playRequest++
                                     currentScreen = SudoluxAppScreen.HOME
                                 },
+                                onBoardStyleSelected = appViewModel::selectBoardStyle,
                                 onBack = { currentScreen = SudoluxAppScreen.HOME }
                             )
                         }

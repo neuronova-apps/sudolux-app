@@ -142,8 +142,7 @@ class PlayerProgressStateTest {
     @Test
     fun absoluteMasteryUnlockIsDetectedAtItsMilestone() {
         val current = PlayerProgress(
-            medalCounts = mapOf(Medal.LEGEND to 4),
-            absoluteMasteryCount = 4
+            medalCounts = mapOf(Medal.LEGEND to 4)
         )
         val update = ProgressionCalculator.applyResult(
             current,

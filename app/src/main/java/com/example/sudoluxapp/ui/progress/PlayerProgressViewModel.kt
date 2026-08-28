@@ -6,6 +6,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.AndroidViewModel
 import com.example.sudoluxapp.data.SharedPreferencesKeyValueStorage
 import com.example.sudoluxapp.data.SudoluxRepository
+import com.example.sudoluxapp.domain.progression.BoardStyle
 import com.example.sudoluxapp.domain.progression.GameResult
 import com.example.sudoluxapp.domain.progression.PlayerProgress
 import com.example.sudoluxapp.domain.progression.ProgressUpdate
@@ -30,6 +31,13 @@ class PlayerProgressViewModel(application: Application) : AndroidViewModel(appli
     fun discardActiveGame() {
         mutableActiveGame.value = null
         repository.clearActiveGame()
+    }
+
+    fun selectBoardStyle(boardStyle: BoardStyle) {
+        val updated = mutableProgress.value.selectBoardStyle(boardStyle)
+        if (updated == mutableProgress.value) return
+        mutableProgress.value = updated
+        repository.saveProgress(updated)
     }
 
     fun applyResult(gameId: String, result: GameResult): ProgressUpdate =

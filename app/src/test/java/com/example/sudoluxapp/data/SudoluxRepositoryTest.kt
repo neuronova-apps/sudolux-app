@@ -1,6 +1,7 @@
 package com.example.sudoluxapp.data
 
 import com.example.sudoluxapp.domain.premium.AccessTier
+import com.example.sudoluxapp.domain.progression.BoardStyle
 import com.example.sudoluxapp.domain.progression.GameMode
 import com.example.sudoluxapp.domain.progression.CompletedGameRecord
 import com.example.sudoluxapp.domain.progression.GameCompletionStatus
@@ -23,6 +24,84 @@ class SudoluxRepositoryTest {
         assertEquals(0, progress.totalXp)
         assertEquals(1, progress.currentLevel)
         assertEquals("Novato", progress.currentTitle)
+        assertEquals(BoardStyle.DEFAULT, progress.selectedBoardStyle)
+    }
+
+    @Test
+    fun selectedBoardStyleSurvivesRepositoryRecreation() {
+        val storage = MemoryStorage()
+        val progress = PlayerProgress(
+            totalXp = xpToReach(25),
+            selectedBoardStyle = BoardStyle.ADVANCED
+        )
+
+        SudoluxRepository(storage).saveProgress(progress)
+
+        assertEquals(BoardStyle.ADVANCED, SudoluxRepository(storage).loadProgress().selectedBoardStyle)
+    }
+
+    @Test
+    fun returningToDefaultBoardAlsoSurvivesRepositoryRecreation() {
+        val storage = MemoryStorage()
+        val repository = SudoluxRepository(storage)
+        val advanced = PlayerProgress(totalXp = xpToReach(25))
+            .selectBoardStyle(BoardStyle.ADVANCED)
+
+        repository.saveProgress(advanced)
+        repository.saveProgress(advanced.selectBoardStyle(BoardStyle.DEFAULT))
+
+        assertEquals(BoardStyle.DEFAULT, SudoluxRepository(storage).loadProgress().selectedBoardStyle)
+    }
+
+    @Test
+    fun changingBoardStyleDoesNotModifyAnActiveGame() {
+        val storage = MemoryStorage()
+        val repository = SudoluxRepository(storage)
+        val puzzle = SudokuTestFixtures.puzzle
+        val editable = puzzle.initialBoard.indexOfFirst { it == 0 }
+        val activeGame = SudokuGameState(puzzle, gameId = "board-style-active")
+            .select(editable)
+            .toggleNotes()
+            .enter(4)
+
+        repository.saveActiveGame(activeGame)
+        repository.saveProgress(
+            PlayerProgress(totalXp = xpToReach(25))
+                .selectBoardStyle(BoardStyle.ADVANCED)
+        )
+
+        val recreated = SudoluxRepository(storage)
+        val restoredGame = requireNotNull(recreated.loadActiveGame())
+        assertEquals(BoardStyle.ADVANCED, recreated.loadProgress().selectedBoardStyle)
+        assertEquals(activeGame.gameId, restoredGame.gameId)
+        assertEquals(activeGame.puzzle, restoredGame.puzzle)
+        assertEquals(activeGame.values, restoredGame.values)
+        assertEquals(activeGame.notes, restoredGame.notes)
+        assertEquals(activeGame.selectedCell, restoredGame.selectedCell)
+        assertEquals(activeGame.notesMode, restoredGame.notesMode)
+        assertEquals(activeGame.errors, restoredGame.errors)
+        assertEquals(activeGame.hintsUsed, restoredGame.hintsUsed)
+    }
+
+    @Test
+    fun legacyMasteryMigratesToLegendMedalsAndParallelCounterIsRemovedOnSave() {
+        val storage = MemoryStorage()
+        storage.replace(
+            emptySet(),
+            mapOf(
+                "progress.mastery" to "5",
+                "progress.medal.LEGEND" to "2"
+            )
+        )
+        val repository = SudoluxRepository(storage)
+
+        val migrated = repository.loadProgress()
+        repository.saveProgress(migrated)
+
+        assertEquals(5, migrated.legendMedalCount)
+        assertEquals(5, migrated.absoluteMasteryCount)
+        assertNull(storage.get("progress.mastery"))
+        assertEquals("5", storage.get("progress.medal.LEGEND"))
     }
 
     @Test
@@ -31,7 +110,6 @@ class SudoluxRepositoryTest {
         val expected = PlayerProgress(
             totalXp = 987,
             medalCounts = Medal.entries.associateWith { it.ordinal + 2 },
-            absoluteMasteryCount = 5,
             unlockedIds = setOf("background_1", "special_master_background"),
             processedGameIds = setOf("game-1", "game-2"),
             completedGameRecords = mapOf(
@@ -139,7 +217,6 @@ class SudoluxRepositoryTest {
         val expected = PlayerProgress(
             totalXp = 420,
             medalCounts = Medal.entries.associateWith { it.ordinal + 1 },
-            absoluteMasteryCount = 5,
             unlockedIds = setOf("background_1", "special_master_background")
         )
         SudoluxRepository(storage).saveProgress(expected)
@@ -151,7 +228,7 @@ class SudoluxRepositoryTest {
         assertEquals(SudoluxAppScreen.HOME, destination)
         assertEquals(expected, restored)
         assertEquals(420, presented.level.totalXp)
-        assertEquals(5, presented.absoluteMasteryCount)
+        assertEquals(6, presented.absoluteMasteryCount)
         assertEquals(6, presented.medals.size)
         assertTrue(presented.unlocked.any { it.id == "special_master_background" })
     }
@@ -164,4 +241,7 @@ class SudoluxRepositoryTest {
             this.values.putAll(values)
         }
     }
+
+    private fun xpToReach(level: Int): Int =
+        (1 until level).sumOf(com.example.sudoluxapp.domain.progression.PlayerLevelCalculator::xpRequiredForNextLevel)
 }
