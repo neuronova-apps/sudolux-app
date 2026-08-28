@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 1,
+  "product": "Sudolux",
+  "web": {
+    "role": "Acceso web oficial",
+    "available": true,
+    "url": "https://neuronova-apps.github.io/sudolux-app/"
+  },
+  "android": {
+    "projectExists": true,
+    "distribution": "Google Play",
+    "status": "Beta / preparación de distribución",
+    "publicUrl": null
+  },
+  "facebookInstantGames": {
+    "supported": true,
+    "appId": "1385490019602584",
+    "status": "Acceso público pendiente de confirmar",
+    "publicUrl": null
+  }
+}
