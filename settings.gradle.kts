@@ -22,6 +22,6 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "Sudolux App"
+rootProject.name = "Sudolux"
 include(":app")
  
