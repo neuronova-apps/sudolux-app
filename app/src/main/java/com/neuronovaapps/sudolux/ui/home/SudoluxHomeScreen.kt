@@ -89,8 +89,6 @@ private val BorderColor: Color
     @Composable get() = MaterialTheme.colorScheme.outlineVariant
 private val MutedText: Color
     @Composable get() = MaterialTheme.colorScheme.onSurfaceVariant
-private val WarmAccent = Color(0xFFD76A00)
-
 private val difficulties = SudokuDifficulty.entries.map(SudokuDifficulty::displayName)
 
 @Composable
@@ -193,7 +191,6 @@ fun SudoluxHomeScreen(
                                 verticalArrangement = Arrangement.spacedBy(12.dp)
                             ) {
                                 PlayerProgressCard(playerProgress)
-                                QuickAccessRow()
                                 activeGame?.let {
                                     ContinueCard(game = it, onClick = onContinueGame)
                                 }
@@ -215,7 +212,6 @@ fun SudoluxHomeScreen(
                     }
                 } else {
                     item { PlayerProgressCard(playerProgress) }
-                    item { QuickAccessRow() }
                     activeGame?.let { game ->
                         item { ContinueCard(game = game, onClick = onContinueGame) }
                     }
@@ -423,66 +419,6 @@ private fun PlayerProgressCard(progress: PlayerProgress) {
 }
 
 @Composable
-private fun QuickAccessRow() {
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.spacedBy(10.dp)
-    ) {
-        QuickStatCard(
-            eyebrow = "DESAFÍO DIARIO",
-            title = "Sudoku del día",
-            value = "+150 XP",
-            accent = Primary,
-            modifier = Modifier.weight(1f)
-        )
-        QuickStatCard(
-            eyebrow = "RACHA",
-            title = "12 días",
-            value = "Mejor: 18",
-            accent = WarmAccent,
-            modifier = Modifier.weight(1f)
-        )
-    }
-}
-
-@Composable
-private fun QuickStatCard(
-    eyebrow: String,
-    title: String,
-    value: String,
-    accent: Color,
-    modifier: Modifier = Modifier
-) {
-    Card(
-        modifier = modifier.heightIn(min = 88.dp),
-        shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(containerColor = SurfaceColor),
-        border = BorderStroke(1.dp, BorderColor)
-    ) {
-        Column(
-            modifier = Modifier.padding(horizontal = 13.dp, vertical = 11.dp),
-            verticalArrangement = Arrangement.spacedBy(2.dp)
-        ) {
-            Text(
-                text = eyebrow,
-                color = accent,
-                fontSize = 9.sp,
-                fontWeight = FontWeight.ExtraBold,
-                letterSpacing = 0.5.sp
-            )
-            Text(
-                text = title,
-                color = MaterialTheme.colorScheme.onSurface,
-                fontSize = 14.sp,
-                fontWeight = FontWeight.Bold,
-                maxLines = 1
-            )
-            Text(text = value, color = MutedText, fontSize = 12.sp, maxLines = 1)
-        }
-    }
-}
-
-@Composable
 private fun ContinueCard(game: SudokuGameState, onClick: () -> Unit) {
     val hintSummary = if (game.mode == GameMode.WITH_HINTS) {
         "${game.hintsRemaining}/3 pistas disponibles"
@@ -538,7 +474,7 @@ private fun LearnSudokuCard(onClick: () -> Unit) {
         modifier = Modifier
             .fillMaxWidth()
             .heightIn(min = 66.dp)
-            .semantics { contentDescription = "Aprende Sudoku. Técnicas y estrategias" },
+            .semantics { contentDescription = "Aprende Sudoku. Próximamente" },
         shape = RoundedCornerShape(17.dp),
         color = SurfaceColor,
         border = BorderStroke(1.dp, BorderColor)
@@ -560,7 +496,12 @@ private fun LearnSudokuCard(onClick: () -> Unit) {
                 Text("Aprende Sudoku", fontSize = 15.sp, fontWeight = FontWeight.Bold)
                 Text("Técnicas y estrategias", color = MutedText, fontSize = 12.sp)
             }
-            Text("›", color = Primary, fontSize = 26.sp)
+            Text(
+                "Próximamente",
+                color = Primary,
+                fontSize = 12.sp,
+                fontWeight = FontWeight.Bold
+            )
         }
     }
 }

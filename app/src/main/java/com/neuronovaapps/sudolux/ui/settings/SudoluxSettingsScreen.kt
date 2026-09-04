@@ -408,16 +408,10 @@ private fun AccessibilitySection(
 @Composable
 private fun FeedbackSection(
     settings: UserSettings,
-    onSoundChange: (Boolean) -> Unit,
+    @Suppress("UNUSED_PARAMETER") onSoundChange: (Boolean) -> Unit,
     onHapticsChange: (Boolean) -> Unit
 ) {
     SettingsCard("Respuesta") {
-        SettingToggle(
-            title = "Sonido",
-            description = "Preparado para futuros efectos de juego",
-            checked = settings.soundEnabled,
-            onCheckedChange = onSoundChange
-        )
         SettingToggle(
             title = "Vibración",
             description = "Respuesta háptica al jugar e interactuar",
