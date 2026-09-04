@@ -4,13 +4,13 @@ plugins {
 }
 
 android {
-    namespace = "com.example.sudoluxapp"
+    namespace = "com.neuronovaapps.sudolux"
     compileSdk {
         version = release(37)
     }
 
     defaultConfig {
-        applicationId = "com.example.sudoluxapp"
+        applicationId = "com.neuronovaapps.sudolux"
         minSdk = 24
         targetSdk = 37
         versionCode = 1
