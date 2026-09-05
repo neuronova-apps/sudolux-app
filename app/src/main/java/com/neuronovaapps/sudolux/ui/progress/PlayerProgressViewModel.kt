@@ -6,6 +6,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.AndroidViewModel
 import com.neuronovaapps.sudolux.data.SharedPreferencesKeyValueStorage
 import com.neuronovaapps.sudolux.data.SudoluxRepository
+import com.neuronovaapps.sudolux.domain.premium.PremiumFeatureFlags
 import com.neuronovaapps.sudolux.domain.progression.BoardStyle
 import com.neuronovaapps.sudolux.domain.progression.GameResult
 import com.neuronovaapps.sudolux.domain.progression.PlayerProgress
@@ -20,7 +21,9 @@ class PlayerProgressViewModel(application: Application) : AndroidViewModel(appli
     private val mutableProgress = mutableStateOf(repository.loadProgress())
     val progress: State<PlayerProgress> = mutableProgress
 
-    private val mutableActiveGame = mutableStateOf(repository.loadActiveGame())
+    private val mutableActiveGame = mutableStateOf(
+        repository.loadActiveGame(PremiumFeatureFlags.currentTier)
+    )
     val activeGame: State<SudokuGameState?> = mutableActiveGame
 
     fun updateGame(game: SudokuGameState) {

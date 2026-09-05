@@ -26,7 +26,7 @@ class PremiumContinuationTest {
         assertTrue(pending.premiumContinuationPending)
         assertFalse(pending.attemptFinished)
 
-        val continued = pending.continueWithPremiumPenalty()
+        val continued = pending.continueWithPremiumPenalty(AccessTier.PREMIUM)
         assertTrue(continued.premiumContinuationUsed)
         assertFalse(continued.premiumContinuationPending)
         assertEquals(
@@ -46,7 +46,8 @@ class PremiumContinuationTest {
 
     @Test
     fun everyErrorAfterRescueAppliesTenPercentAndNeverDropsBelowMinimum() {
-        var state = afterThreeErrors(AccessTier.PREMIUM).continueWithPremiumPenalty()
+        var state = afterThreeErrors(AccessTier.PREMIUM)
+            .continueWithPremiumPenalty(AccessTier.PREMIUM)
         val before = state.potentialXp
         state = state.enter(wrongNumber(state), AccessTier.PREMIUM)
         assertEquals(
@@ -89,6 +90,99 @@ class PremiumContinuationTest {
         assertEquals(600, result.xpEarned)
         assertEquals(Medal.LEGEND, result.medal)
         assertEquals(1, update.progress.absoluteMasteryCount)
+    }
+
+    @Test
+    fun freeNormalStateRemainsPlayableAndCannotOfferPremiumContinuation() {
+        val state = baseGame()
+
+        val normalized = state.normalizeForAccessTier(AccessTier.FREE)
+
+        assertEquals(state, normalized)
+        assertFalse(normalized.attemptFinished)
+        assertFalse(normalized.canOfferPremiumContinuation(AccessTier.FREE))
+    }
+
+    @Test
+    fun freeNeutralizesInheritedPendingStateBeforeErrorLimit() {
+        val inherited = baseGame().copy(
+            errors = 2,
+            premiumContinuationPending = true,
+            xpPossible = 99
+        )
+
+        val normalized = inherited.normalizeForAccessTier(AccessTier.FREE)
+
+        assertFalse(normalized.premiumContinuationPending)
+        assertFalse(normalized.premiumContinuationUsed)
+        assertFalse(normalized.attemptFinished)
+        assertFalse(normalized.canOfferPremiumContinuation(AccessTier.FREE))
+        assertEquals(
+            XpCalculator.potentialXp(
+                normalized.puzzle.difficulty,
+                normalized.mode,
+                normalized.hintsUsed,
+                normalized.errors
+            ),
+            normalized.potentialXp
+        )
+    }
+
+    @Test
+    fun freeNeutralizesInheritedUsedStateBeforeErrorLimit() {
+        val inherited = baseGame().copy(
+            errors = 1,
+            premiumContinuationUsed = true,
+            xpPossible = XpCalculator.minimumReward(SudokuDifficulty.HARD)
+        )
+
+        val normalized = inherited.normalizeForAccessTier(AccessTier.FREE)
+
+        assertFalse(normalized.premiumContinuationUsed)
+        assertFalse(normalized.premiumContinuationPending)
+        assertFalse(normalized.attemptFinished)
+        assertEquals(
+            XpCalculator.potentialXp(
+                normalized.puzzle.difficulty,
+                normalized.mode,
+                normalized.hintsUsed,
+                normalized.errors
+            ),
+            normalized.potentialXp
+        )
+    }
+
+    @Test
+    fun freeNormalizesInheritedPremiumStateAtErrorLimitToGameOver() {
+        val inherited = baseGame().copy(
+            errors = SudokuGameState.MAX_ERRORS,
+            premiumContinuationPending = true,
+            xpPossible = 99
+        )
+
+        val normalized = inherited.normalizeForAccessTier(AccessTier.FREE)
+
+        assertTrue(normalized.attemptFinished)
+        assertFalse(normalized.premiumContinuationPending)
+        assertFalse(normalized.premiumContinuationUsed)
+        assertEquals(0, normalized.potentialXp)
+        assertFalse(normalized.canOfferPremiumContinuation(AccessTier.FREE))
+    }
+
+    @Test
+    fun directPremiumContinuationAttemptIsRejectedForFreeWithoutCrash() {
+        val inherited = baseGame().copy(
+            errors = SudokuGameState.MAX_ERRORS,
+            premiumContinuationPending = true,
+            xpPossible = 99
+        )
+
+        val rejected = inherited.continueWithPremiumPenalty(AccessTier.FREE)
+
+        assertTrue(rejected.attemptFinished)
+        assertFalse(rejected.premiumContinuationPending)
+        assertFalse(rejected.premiumContinuationUsed)
+        assertEquals(0, rejected.potentialXp)
     }
 
     private fun afterThreeErrors(tier: AccessTier): SudokuGameState {

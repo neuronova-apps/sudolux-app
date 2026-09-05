@@ -234,8 +234,32 @@ data class SudokuGameState(
     fun dismissVictory(): SudokuGameState = copy(showVictory = false)
     fun retry(): SudokuGameState = SudokuGameState(puzzle = puzzle, mode = mode)
 
-    fun continueWithPremiumPenalty(): SudokuGameState {
-        if (!premiumContinuationPending || premiumContinuationUsed) return this
+    fun normalizeForAccessTier(accessTier: AccessTier): SudokuGameState {
+        if (accessTier == AccessTier.PREMIUM) return this
+
+        val shouldFinishAttempt = attemptFinished || errors >= MAX_ERRORS
+        return copy(
+            premiumContinuationUsed = false,
+            premiumContinuationPending = false,
+            attemptFinished = shouldFinishAttempt,
+            xpPossible = if (shouldFinishAttempt) {
+                0
+            } else {
+                XpCalculator.potentialXp(puzzle.difficulty, mode, hintsUsed, errors)
+            }
+        )
+    }
+
+    fun canOfferPremiumContinuation(accessTier: AccessTier): Boolean =
+        accessTier == AccessTier.PREMIUM &&
+            premiumContinuationPending &&
+            !premiumContinuationUsed &&
+            !attemptFinished &&
+            errors >= MAX_ERRORS
+
+    fun continueWithPremiumPenalty(accessTier: AccessTier): SudokuGameState {
+        if (accessTier == AccessTier.FREE) return normalizeForAccessTier(accessTier)
+        if (!canOfferPremiumContinuation(accessTier)) return this
         return copy(
             premiumContinuationUsed = true,
             premiumContinuationPending = false,

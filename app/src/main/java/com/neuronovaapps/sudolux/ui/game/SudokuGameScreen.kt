@@ -116,9 +116,9 @@ fun SudokuGameScreen(
     modifier: Modifier = Modifier
 ) {
     val requestedDifficulty = SudokuDifficulty.fromDisplayName(difficulty)
-    val activeGame = game?.takeIf {
-        it.puzzle.difficulty == requestedDifficulty && it.mode == mode
-    }
+    val activeGame = game
+        ?.takeIf { it.puzzle.difficulty == requestedDifficulty && it.mode == mode }
+        ?.normalizeForAccessTier(accessTier)
     val gameFactory = remember { SudokuGameFactory() }
     var generationRequest by remember(difficulty) { mutableIntStateOf(0) }
     var isGenerating by remember(difficulty) { mutableStateOf(false) }
@@ -251,9 +251,11 @@ fun SudokuGameScreen(
         )
     }
 
-    if (activeGame.premiumContinuationPending) {
+    if (activeGame.canOfferPremiumContinuation(accessTier)) {
         PremiumContinuationDialog(
-            onContinue = { onGameChange(activeGame.continueWithPremiumPenalty()) },
+            onContinue = {
+                onGameChange(activeGame.continueWithPremiumPenalty(accessTier))
+            },
             onFinish = { onGameChange(activeGame.finishPremiumAttempt()) }
         )
     } else if (activeGame.attemptFinished) {

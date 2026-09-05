@@ -12,6 +12,7 @@ import com.neuronovaapps.sudolux.ui.game.SudokuGameState
 import com.neuronovaapps.sudolux.ui.navigation.SudoluxAppScreen
 import com.neuronovaapps.sudolux.ui.progress.ProgressScreenPresenter
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
@@ -169,11 +170,13 @@ class SudoluxRepositoryTest {
             .enter(wrong, AccessTier.PREMIUM)
             .enter(wrong, AccessTier.PREMIUM)
             .enter(wrong, AccessTier.PREMIUM)
-            .continueWithPremiumPenalty()
+            .continueWithPremiumPenalty(AccessTier.PREMIUM)
         game = game.hint()
 
         SudoluxRepository(storage).saveActiveGame(game)
-        val restored = requireNotNull(SudoluxRepository(storage).loadActiveGame())
+        val restored = requireNotNull(
+            SudoluxRepository(storage).loadActiveGame(AccessTier.PREMIUM)
+        )
 
         assertEquals(game.gameId, restored.gameId)
         assertEquals(game.puzzle, restored.puzzle)
@@ -184,6 +187,106 @@ class SudoluxRepositoryTest {
         assertEquals(game.hintsUsed, restored.hintsUsed)
         assertEquals(game.xpPossible, restored.xpPossible)
         assertTrue(restored.premiumContinuationUsed)
+    }
+
+    @Test
+    fun freeRestoreNeutralizesInheritedPendingStateAndPersistsTheCorrection() {
+        val storage = MemoryStorage()
+        val inherited = SudokuGameState(
+            puzzle = SudokuTestFixtures.puzzle,
+            gameId = "free-pending",
+            errors = 2,
+            premiumContinuationPending = true,
+            xpPossible = 99
+        )
+        SudoluxRepository(storage).saveActiveGame(inherited)
+
+        val restored = requireNotNull(
+            SudoluxRepository(storage).loadActiveGame(AccessTier.FREE)
+        )
+        val reloaded = requireNotNull(
+            SudoluxRepository(storage).loadActiveGame(AccessTier.FREE)
+        )
+
+        assertFalse(restored.premiumContinuationPending)
+        assertFalse(restored.premiumContinuationUsed)
+        assertFalse(restored.attemptFinished)
+        assertEquals(restored, reloaded)
+    }
+
+    @Test
+    fun freeRestoreNeutralizesInheritedUsedStateBeforeErrorLimit() {
+        val storage = MemoryStorage()
+        val inherited = SudokuGameState(
+            puzzle = SudokuTestFixtures.puzzle,
+            gameId = "free-used",
+            errors = 1,
+            premiumContinuationUsed = true,
+            xpPossible = 12
+        )
+        SudoluxRepository(storage).saveActiveGame(inherited)
+
+        val restored = requireNotNull(
+            SudoluxRepository(storage).loadActiveGame(AccessTier.FREE)
+        )
+
+        assertFalse(restored.premiumContinuationPending)
+        assertFalse(restored.premiumContinuationUsed)
+        assertFalse(restored.attemptFinished)
+    }
+
+    @Test
+    fun freeRestoreAtErrorLimitReturnsGameOverAndClearsPersistedActiveGame() {
+        val storage = MemoryStorage()
+        val inherited = SudokuGameState(
+            puzzle = SudokuTestFixtures.puzzle,
+            gameId = "free-limit",
+            errors = SudokuGameState.MAX_ERRORS,
+            premiumContinuationPending = true,
+            xpPossible = 99
+        )
+        val repository = SudoluxRepository(storage)
+        repository.saveActiveGame(inherited)
+
+        val restored = requireNotNull(repository.loadActiveGame(AccessTier.FREE))
+
+        assertTrue(restored.attemptFinished)
+        assertFalse(restored.premiumContinuationPending)
+        assertFalse(restored.premiumContinuationUsed)
+        assertEquals(0, restored.potentialXp)
+        assertNull(repository.loadActiveGame(AccessTier.FREE))
+    }
+
+    @Test
+    fun legacyActiveGameWithoutPremiumKeysLoadsAsNormalFreeState() {
+        val storage = MemoryStorage()
+        val repository = SudoluxRepository(storage)
+        val game = SudokuGameState(SudokuTestFixtures.puzzle, gameId = "legacy-free")
+        repository.saveActiveGame(game)
+        storage.replace(
+            setOf("game.premium_used", "game.premium_pending"),
+            emptyMap()
+        )
+
+        val restored = requireNotNull(repository.loadActiveGame(AccessTier.FREE))
+
+        assertFalse(restored.premiumContinuationPending)
+        assertFalse(restored.premiumContinuationUsed)
+        assertFalse(restored.attemptFinished)
+        assertEquals(game.gameId, restored.gameId)
+    }
+
+    @Test
+    fun malformedActiveGameStillFailsClosedAndIsCleared() {
+        val storage = MemoryStorage()
+        storage.replace(
+            emptySet(),
+            mapOf("game.active" to "true", "game.id" to "malformed")
+        )
+        val repository = SudoluxRepository(storage)
+
+        assertNull(repository.loadActiveGame(AccessTier.FREE))
+        assertNull(storage.get("game.active"))
     }
 
     @Test

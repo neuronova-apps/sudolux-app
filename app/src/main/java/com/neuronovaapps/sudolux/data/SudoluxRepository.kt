@@ -3,6 +3,7 @@ package com.neuronovaapps.sudolux.data
 import android.content.Context
 import android.content.SharedPreferences
 import androidx.core.content.edit
+import com.neuronovaapps.sudolux.domain.premium.AccessTier
 import com.neuronovaapps.sudolux.domain.progression.BoardStyle
 import com.neuronovaapps.sudolux.domain.progression.CompletedGameRecord
 import com.neuronovaapps.sudolux.domain.progression.GameCompletionStatus
@@ -77,7 +78,7 @@ class SudoluxRepository(private val storage: KeyValueStorage) {
         storage.replace(setOf(PROGRESS_MASTERY), values)
     }
 
-    fun loadActiveGame(): SudokuGameState? {
+    fun loadActiveGame(accessTier: AccessTier = AccessTier.FREE): SudokuGameState? {
         if (storage.get(GAME_ACTIVE) != TRUE) return null
         return runCatching {
             val initialBoard = decodeBoard(required(GAME_INITIAL_BOARD), allowZero = true)
@@ -88,7 +89,7 @@ class SudoluxRepository(private val storage: KeyValueStorage) {
                 difficulty = SudokuDifficulty.valueOf(required(GAME_DIFFICULTY)),
                 seed = required(GAME_SEED).toLong()
             )
-            SudokuGameState(
+            val restored = SudokuGameState(
                 puzzle = puzzle,
                 gameId = required(GAME_ID),
                 mode = GameMode.valueOf(required(GAME_MODE)),
@@ -103,6 +104,9 @@ class SudoluxRepository(private val storage: KeyValueStorage) {
                 premiumContinuationPending = storage.get(GAME_PREMIUM_PENDING).toBooleanStrictOrFalse(),
                 attemptFinished = false
             )
+            val normalized = restored.normalizeForAccessTier(accessTier)
+            if (normalized != restored) saveActiveGame(normalized)
+            normalized
         }.getOrElse {
             clearActiveGame()
             null
