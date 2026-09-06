@@ -152,7 +152,7 @@ internal fun SudoluxAppIcon(
             ImageView(context).apply {
                 adjustViewBounds = true
                 scaleType = ImageView.ScaleType.FIT_CENTER
-                setImageResource(R.mipmap.ic_launcher)
+                setImageResource(R.drawable.sudolux_intro_icon)
                 this.contentDescription = contentDescription
             }
         },
